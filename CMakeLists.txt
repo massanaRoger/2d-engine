@@ -3,4 +3,40 @@ project(2d_engine)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(2d_engine main.cpp)
+include(FetchContent)
+
+set(GLFW_VERSION 3.4)
+FetchContent_Declare(
+        glfw
+        URL https://github.com/glfw/glfw/archive/refs/tags/${GLFW_VERSION}.tar.gz
+        FIND_PACKAGE_ARGS ${GLFW_VERSION}
+)
+set(BUILD_EXAMPLES OFF CACHE INTERNAL "")
+FetchContent_MakeAvailable(glfw)
+
+set(GLAD_VERSION 0.1.36)
+FetchContent_Declare(
+        glad
+        GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+        GIT_TAG v${GLAD_VERSION}
+)
+set(GLAD_PROFILE "core"	CACHE STRING "OpenGL profile")
+set(GLAD_GENERATOR "c"	CACHE STRING "Language to generate the binding for")
+FetchContent_MakeAvailable(glad)
+
+set(GLAD_VERSION 1.0.1)
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG ${GLAD_VERSION}
+)
+FetchContent_MakeAvailable(glm)
+
+# Include GLAD's include directory
+include_directories(${glad_SOURCE_DIR}/include)
+
+add_executable(${PROJECT_NAME}
+        src/main.cpp)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glad glm)
+
