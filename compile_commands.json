@@ -1,0 +1,146 @@
+[
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glad-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glad-build/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glm-src -g -fdiagnostics-color=always -o CMakeFiles\\2d_engine.dir\\src\\main.cpp.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\src\\main.cpp",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\src\\main.cpp",
+  "output": "CMakeFiles\\2d_engine.dir\\src\\main.cpp.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\context.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\context.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\context.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\context.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\init.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\init.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\init.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\init.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\input.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\input.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\input.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\input.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\monitor.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\monitor.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\monitor.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\monitor.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\platform.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\platform.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\platform.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\platform.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\vulkan.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\vulkan.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\vulkan.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\vulkan.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\window.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\window.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\window.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\window.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\egl_context.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\egl_context.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\egl_context.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\egl_context.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\osmesa_context.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\osmesa_context.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\osmesa_context.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\osmesa_context.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_init.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_init.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_init.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_init.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_monitor.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_monitor.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_monitor.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_monitor.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_window.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_window.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_window.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_window.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_joystick.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_joystick.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\null_joystick.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\null_joystick.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_module.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_module.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_module.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_module.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_time.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_time.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_time.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_time.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_thread.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_thread.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_thread.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_thread.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_init.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_init.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_init.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_init.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_joystick.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_joystick.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_joystick.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_joystick.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_monitor.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_monitor.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_monitor.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_monitor.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_window.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_window.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\win32_window.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\win32_window.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_WIN32 -D_UNICODE -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/include -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-src/src -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glfw-build/src -g -std=c99 -fdiagnostics-color=always -Wall -o _deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\wgl_context.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\wgl_context.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glfw-src\\src\\wgl_context.c",
+  "output": "_deps\\glfw-build\\src\\CMakeFiles\\glfw.dir\\wgl_context.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\cc.exe -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glad-build/include -g -fdiagnostics-color=always -o _deps\\glad-build\\CMakeFiles\\glad.dir\\src\\glad.c.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glad-build\\src\\glad.c",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glad-build\\src\\glad.c",
+  "output": "_deps\\glad-build\\CMakeFiles\\glad.dir\\src\\glad.c.obj"
+},
+{
+  "directory": "C:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -IC:/Users/Roger2/Documents/programming/2d-engine/cmake-build-debug/_deps/glm-src -g -std=c++17 -fdiagnostics-color=always -o _deps\\glm-build\\glm\\CMakeFiles\\glm.dir\\detail\\glm.cpp.obj -c C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glm-src\\glm\\detail\\glm.cpp",
+  "file": "C:\\Users\\Roger2\\Documents\\programming\\2d-engine\\cmake-build-debug\\_deps\\glm-src\\glm\\detail\\glm.cpp",
+  "output": "_deps\\glm-build\\glm\\CMakeFiles\\glm.dir\\detail\\glm.cpp.obj"
+}
+]

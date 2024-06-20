@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 project(2d_engine)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
@@ -36,7 +37,13 @@ FetchContent_MakeAvailable(glm)
 include_directories(${glad_SOURCE_DIR}/include)
 
 add_executable(${PROJECT_NAME}
-        src/main.cpp)
+        src/main.cpp
+        src/shader/Shader.cpp
+        src/utils.cpp
+)
+
+# Define the current working directory as a macro
+add_definitions(-DCURRENT_WORKING_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw glad glm)
 

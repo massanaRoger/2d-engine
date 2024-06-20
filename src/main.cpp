@@ -1,6 +1,9 @@
+#include "shader/Shader.h"
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "utils.h"
 
 using namespace std;
 
@@ -39,6 +42,8 @@ int main()
 
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    Shader vertexShader = Shader(getFullPath("shaders/vertex_shader.glsl"));
 
     while(!glfwWindowShouldClose(window))
     {
