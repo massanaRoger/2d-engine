@@ -6,11 +6,10 @@
 
 #include "utils.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
+void processInput(GLFWwindow *window);
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void pixelToNDC(GLFWwindow* window, double x, double y, double* ndcX, double* ndcY);
 
 void drawCircle(float centerX, float centerY, float radius, int numSegments, float vertices[][3]) {
     // Center of the circle
@@ -27,7 +26,6 @@ void drawCircle(float centerX, float centerY, float radius, int numSegments, flo
         vertices[i][0] = x + centerX;
         vertices[i][1] = y + centerY;
         vertices[i][2] = 0.0f;
-        std::cout << vertices[i][0] << " " << vertices[i][1] << " "  << vertices[i][2] << std::endl;
     }
 
     // Close the circle by adding the first circumference vertex again
@@ -35,6 +33,10 @@ void drawCircle(float centerX, float centerY, float radius, int numSegments, flo
     vertices[numSegments + 1][1] = vertices[1][1];
     vertices[numSegments + 1][2] = vertices[1][2];
 }
+
+unsigned int numCircles = 0;
+unsigned int VBO, VAO;
+const int numSegments = 100;
 
 int main()
 {
@@ -50,7 +52,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 600, "ZMMR", nullptr, nullptr);
+    window = glfwCreateWindow(800, 800, "ZMMR", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to open GLFW window" << std::endl;
         return -1;
@@ -65,6 +67,7 @@ int main()
 
     glViewport(0, 0, 800, 800);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     Shader vertexShader = Shader(getFullPath("shaders/vertex_shader.glsl"), ShaderType::VertexShader);
     Shader fragmentShader = Shader(getFullPath("shaders/fragment_shader.glsl"), ShaderType::FragmentShader);
@@ -91,22 +94,11 @@ int main()
     glDeleteShader(vertexShader.shaderID);
     glDeleteShader(fragmentShader.shaderID);
 
-    // Set the circle parameters
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-    float radius = 0.5f;
-    const int numSegments = 100; // The higher the number, the smoother the circle
-    float vertices[numSegments + 2][3];
-    drawCircle(centerX, centerY, radius, numSegments, vertices);
-
-    unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
@@ -115,9 +107,13 @@ int main()
 
     while(!glfwWindowShouldClose(window))
     {
+        processInput(window);
+
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, numSegments + 2);
+        for (int i = 0; i < numCircles; i++) {
+            glDrawArrays(GL_TRIANGLE_FAN, 0, numSegments + 2);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -125,4 +121,42 @@ int main()
 
     glfwTerminate();
     return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        std::cout << "Clicked" << std::endl;
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        double ndcX, ndcY;
+        pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
+
+        float vertices[numSegments + 2][3];
+        float radius = 0.05f;
+        drawCircle(ndcX, ndcY, radius, numSegments, vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        numCircles++;
+    }
+}
+
+void pixelToNDC(GLFWwindow* window, double x, double y, double* ndcX, double* ndcY) {
+    int windowWidth, windowHeight;
+    glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+    *ndcX = (2.0 * x) / windowWidth - 1.0;
+    *ndcY = 1.0 - (2.0 * y) / windowHeight;
 }
