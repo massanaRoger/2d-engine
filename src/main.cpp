@@ -24,51 +24,60 @@ struct Vertex {
 
 class Circle {
 public:
-    explicit Circle(std::size_t n) {
-        vertices = std::vector<Vertex>();
-        vertices.reserve(n);
+    explicit Circle(std::size_t n): m_descentVector(0.0f) {
+        m_vertices = std::vector<Vertex>();
+        m_vertices.reserve(n);
     }
 
     std::vector<Vertex>& data() {
-        return vertices;
+        return m_vertices;
     }
 
     void insert(const Vertex& vertex) {
-        vertices.push_back(vertex);
+        m_vertices.push_back(vertex);
     }
 
     Vertex& operator[](std::size_t idx) {
-        return vertices[idx];
+        return m_vertices[idx];
     }
 
     const Vertex& operator[](std::size_t idx) const {
-        return vertices[idx];
+        return m_vertices[idx];
     }
 
     std::size_t size() {
-        return vertices.size();
+        return m_vertices.size();
+    }
+
+    void updateTick(double descentSpeed) {
+        m_descentVector.y -= descentSpeed;
+    }
+
+    glm::vec3 &descentVector() {
+        return m_descentVector;
     }
 
     using iterator = std::vector<Vertex>::iterator;
     using const_iterator = std::vector<Vertex>::const_iterator;
 
     iterator begin() {
-        return vertices.begin();
+        return m_vertices.begin();
     }
 
     [[nodiscard]] const_iterator begin() const {
-        return vertices.begin();
+        return m_vertices.begin();
     }
 
     iterator end() {
-        return vertices.end();
+        return m_vertices.end();
     }
 
     [[nodiscard]] const_iterator end() const {
-        return vertices.end();
+        return m_vertices.end();
     }
 private:
-    std::vector<Vertex> vertices;
+    std::vector<Vertex> m_vertices;
+    glm::vec3 m_descentVector;
 };
 
 unsigned int VBO, VAO;
@@ -171,20 +180,22 @@ int main()
         double currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        double descentSpeed = 0.05f * deltaTime;
-        static glm::vec3 descentVector(0.0f, 0.0f, 0.0f);
-        descentVector.y -= descentSpeed;
-
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, descentVector);
+        double descentSpeed = 1.0f * deltaTime;
 
         glUseProgram(shaderProgram);
-
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, &transform[0][0]);
         glBindVertexArray(VAO);
+
         for (auto& circle : programVertices) {
+            circle.updateTick(descentSpeed);
+
             glBufferData(GL_ARRAY_BUFFER, circle.size() * sizeof(Vertex), circle.data().data(), GL_STATIC_DRAW);
+
+            glm::mat4 transform = glm::mat4(1.0f);
+            transform = glm::translate(transform, circle.descentVector());
+
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, &transform[0][0]);
             glDrawArrays(GL_TRIANGLE_FAN, 0, arraySegmentSize);
+
         }
 
         glfwSwapBuffers(window);
