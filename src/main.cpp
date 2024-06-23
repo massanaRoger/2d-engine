@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "Circle.h"
 #include "utils.h"
 #include "glm/ext/matrix_transform.hpp"
 
@@ -14,71 +15,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void pixelToNDC(GLFWwindow* window, double x, double y, double* ndcX, double* ndcY);
 
-struct Vertex {
-    float x;
-    float y;
-    float z;
-
-    Vertex(const float x, const float y, const float z) : x{x}, y{y}, z{z} {}
-};
-
-class Circle {
-public:
-    explicit Circle(std::size_t n): m_descentVector(0.0f) {
-        m_vertices = std::vector<Vertex>();
-        m_vertices.reserve(n);
-    }
-
-    std::vector<Vertex>& data() {
-        return m_vertices;
-    }
-
-    void insert(const Vertex& vertex) {
-        m_vertices.push_back(vertex);
-    }
-
-    Vertex& operator[](std::size_t idx) {
-        return m_vertices[idx];
-    }
-
-    const Vertex& operator[](std::size_t idx) const {
-        return m_vertices[idx];
-    }
-
-    std::size_t size() {
-        return m_vertices.size();
-    }
-
-    void updateTick(double descentSpeed) {
-        m_descentVector.y -= descentSpeed;
-    }
-
-    glm::vec3 &descentVector() {
-        return m_descentVector;
-    }
-
-    using iterator = std::vector<Vertex>::iterator;
-    using const_iterator = std::vector<Vertex>::const_iterator;
-
-    iterator begin() {
-        return m_vertices.begin();
-    }
-
-    [[nodiscard]] const_iterator begin() const {
-        return m_vertices.begin();
-    }
-
-    iterator end() {
-        return m_vertices.end();
-    }
-
-    [[nodiscard]] const_iterator end() const {
-        return m_vertices.end();
-    }
-private:
-    std::vector<Vertex> m_vertices;
-    glm::vec3 m_descentVector;
-};
 
 unsigned int VBO, VAO;
 constexpr int numSegments = 100;
@@ -213,7 +149,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow *window)
 {
-
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }

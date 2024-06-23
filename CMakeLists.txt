@@ -40,6 +40,7 @@ add_executable(${PROJECT_NAME}
         src/main.cpp
         src/shader/Shader.cpp
         src/utils.cpp
+        src/Circle.cpp
 )
 
 # Define the current working directory as a macro
