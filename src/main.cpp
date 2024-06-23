@@ -1,8 +1,10 @@
 #include "shader/Shader.h"
+#include <array>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <vector>
 
 #include "utils.h"
 
@@ -11,32 +13,65 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void pixelToNDC(GLFWwindow* window, double x, double y, double* ndcX, double* ndcY);
 
-void drawCircle(float centerX, float centerY, float radius, int numSegments, float vertices[][3]) {
-    // Center of the circle
-    vertices[0][0] = centerX;
-    vertices[0][1] = centerY;
-    vertices[0][2] = 0.0f;
+struct Vertex {
+    float x;
+    float y;
+    float z;
 
+    Vertex(const float x, const float y, const float z) : x{x}, y{y}, z{z} {}
+};
+
+class Circle {
+public:
+    explicit Circle(std::size_t n) {
+        vertices = std::vector<Vertex>();
+        vertices.reserve(n);
+    }
+    std::vector<Vertex>& data() {
+        return vertices;
+    }
+    void insert(const Vertex& vertex) {
+        vertices.push_back(vertex);
+    }
+    Vertex& operator[](std::size_t idx) {
+        return vertices[idx];
+    }
+    const Vertex& operator[](std::size_t idx) const {
+        return vertices[idx];
+    }
+    std::size_t size() {
+        return vertices.size();
+    }
+private:
+    std::vector<Vertex> vertices;
+};
+
+unsigned int numCircles = 0;
+unsigned int VBO, VAO;
+constexpr int numSegments = 100;
+constexpr int arraySegmentSize = numSegments + 2;
+double deltaTime = 0.0f;
+double lastFrame = 0.0f;
+auto programVertices = std::vector<Circle>();
+
+void drawCircle(float centerX, float centerY, float radius, int numSegments, Circle circle) {
+    // Center of the circle
+    Vertex startVertex(centerX, centerY, 0.0f);
+    circle.insert(startVertex);
     for (int i = 1; i <= numSegments; i++) {
         float theta = 2.0f * 3.1415926f * float(i - 1) / float(numSegments); // Get the current angle
 
         float x = radius * glm::cos(theta); // Calculate the x component
         float y = radius * glm::sin(theta); // Calculate the y component
-
-        vertices[i][0] = x + centerX;
-        vertices[i][1] = y + centerY;
-        vertices[i][2] = 0.0f;
+        Vertex v(x + centerX, y + centerY, 0.0f);
+        circle.insert(v);
     }
 
     // Close the circle by adding the first circumference vertex again
-    vertices[numSegments + 1][0] = vertices[1][0];
-    vertices[numSegments + 1][1] = vertices[1][1];
-    vertices[numSegments + 1][2] = vertices[1][2];
+    Vertex endVertex(circle[1].x, circle[1].y, circle[1].z);
+    circle.insert(endVertex);
 }
 
-unsigned int numCircles = 0;
-unsigned int VBO, VAO;
-const int numSegments = 100;
 
 int main()
 {
@@ -130,6 +165,18 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow *window)
 {
+    double currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+    double descentSpeed = 0.05f * deltaTime;
+
+    for (auto vertices : programVertices) {
+        for (int i = 0; i < numCircles; i++) {
+            vertices[i].y -= descentSpeed;
+        }
+    }
+    
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -144,11 +191,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         double ndcX, ndcY;
         pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
 
-        float vertices[numSegments + 2][3];
         float radius = 0.05f;
-        drawCircle(ndcX, ndcY, radius, numSegments, vertices);
+        Circle circle(arraySegmentSize);
+        drawCircle(ndcX, ndcY, radius, numSegments, circle);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, circle.size(), circle.data().data(), GL_STATIC_DRAW);
+        programVertices.push_back(circle);
         numCircles++;
     }
 }
