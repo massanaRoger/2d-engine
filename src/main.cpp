@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "utils.h"
+#include "glm/ext/matrix_transform.hpp"
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -27,26 +28,49 @@ public:
         vertices = std::vector<Vertex>();
         vertices.reserve(n);
     }
+
     std::vector<Vertex>& data() {
         return vertices;
     }
+
     void insert(const Vertex& vertex) {
         vertices.push_back(vertex);
     }
+
     Vertex& operator[](std::size_t idx) {
         return vertices[idx];
     }
+
     const Vertex& operator[](std::size_t idx) const {
         return vertices[idx];
     }
+
     std::size_t size() {
         return vertices.size();
+    }
+
+    using iterator = std::vector<Vertex>::iterator;
+    using const_iterator = std::vector<Vertex>::const_iterator;
+
+    iterator begin() {
+        return vertices.begin();
+    }
+
+    [[nodiscard]] const_iterator begin() const {
+        return vertices.begin();
+    }
+
+    iterator end() {
+        return vertices.end();
+    }
+
+    [[nodiscard]] const_iterator end() const {
+        return vertices.end();
     }
 private:
     std::vector<Vertex> vertices;
 };
 
-unsigned int numCircles = 0;
 unsigned int VBO, VAO;
 constexpr int numSegments = 100;
 constexpr int arraySegmentSize = numSegments + 2;
@@ -54,7 +78,7 @@ double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 auto programVertices = std::vector<Circle>();
 
-void drawCircle(float centerX, float centerY, float radius, int numSegments, Circle circle) {
+void drawCircle(float centerX, float centerY, float radius, int numSegments, Circle& circle) {
     // Center of the circle
     Vertex startVertex(centerX, centerY, 0.0f);
     circle.insert(startVertex);
@@ -116,11 +140,11 @@ int main()
 
     int  success;
     char infoLog[512];
-    glGetProgramiv(shaderProgram, GL_COMPILE_STATUS, &success);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
     if (!success)
     {
-        glGetShaderInfoLog(shaderProgram, 512, nullptr, infoLog);
+        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
         std::cerr << "ERROR::PROGRAM::LINKING FAILED\n" << infoLog << std::endl;
     }
 
@@ -138,16 +162,29 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
 
-    glUseProgram(shaderProgram);
-
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
 
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        double currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+        double descentSpeed = 0.05f * deltaTime;
+        static glm::vec3 descentVector(0.0f, 0.0f, 0.0f);
+        descentVector.y -= descentSpeed;
+
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, descentVector);
+
         glUseProgram(shaderProgram);
+
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, &transform[0][0]);
         glBindVertexArray(VAO);
-        for (int i = 0; i < numCircles; i++) {
-            glDrawArrays(GL_TRIANGLE_FAN, 0, numSegments + 2);
+        for (auto& circle : programVertices) {
+            glBufferData(GL_ARRAY_BUFFER, circle.size() * sizeof(Vertex), circle.data().data(), GL_STATIC_DRAW);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, arraySegmentSize);
         }
 
         glfwSwapBuffers(window);
@@ -165,17 +202,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow *window)
 {
-    double currentFrame = glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
-    double descentSpeed = 0.05f * deltaTime;
-
-    for (auto vertices : programVertices) {
-        for (int i = 0; i < numCircles; i++) {
-            vertices[i].y -= descentSpeed;
-        }
-    }
-    
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
@@ -195,9 +221,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         Circle circle(arraySegmentSize);
         drawCircle(ndcX, ndcY, radius, numSegments, circle);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, circle.size(), circle.data().data(), GL_STATIC_DRAW);
+
         programVertices.push_back(circle);
-        numCircles++;
     }
 }
 
