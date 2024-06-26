@@ -41,6 +41,7 @@ add_executable(${PROJECT_NAME}
         src/shader/Shader.cpp
         src/utils.cpp
         src/Circle.cpp
+        src/Renderer.cpp
 )
 
 # Define the current working directory as a macro

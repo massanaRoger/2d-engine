@@ -4,43 +4,65 @@
 #include <sstream>
 #include <glad/glad.h>
 
-Shader::Shader(const std::string& filePath, const ShaderType shaderType): shaderID(-1) {
-    std::string shaderCode;
-    if (readFileToString(filePath, shaderCode)) {
-        compileShader(shaderCode.c_str(), shaderType);
-    } else {
-        std::cerr << "Failed to read file: " << filePath << std::endl;
+Shader::Shader(const std::string& vFilePath, const std::string& fFilePath) {
+    std::string vShaderCode;
+    if (!readFileToString(vFilePath, vShaderCode)) {
+        std::cerr << "Failed to read file: " << vFilePath << std::endl;
     }
+
+    std::string fShaderCode;
+    if (!readFileToString(fFilePath, fShaderCode)) {
+        std::cerr << "Failed to read file: " << vFilePath << std::endl;
+    }
+
+    compileShader(vShaderCode.c_str(), fShaderCode.c_str());
+    compileProgram();
 }
 
-void Shader::compileShader(const char* shaderCode, const ShaderType shaderType) {
-    switch (shaderType) {
-        case ShaderType::VertexShader:
-            {
-                shaderID = glCreateShader(GL_VERTEX_SHADER);
-                break;
-            }
-        case ShaderType::FragmentShader:
-            {
-                shaderID = glCreateShader(GL_FRAGMENT_SHADER);
-                break;
-            }
-        default:
-            {
-                shaderID = glCreateShader(GL_VERTEX_SHADER);
-                break;
-            }
-    }
+void Shader::compileProgram() {
+    programID = glCreateProgram();
 
-    glShaderSource(shaderID, 1, &shaderCode, nullptr);
-    glCompileShader(shaderID);
+    glAttachShader(programID, m_vShaderID);
+    glAttachShader(programID, m_fShaderID);
+    glLinkProgram(programID);
+
     int  success;
     char infoLog[512];
-    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
+    glGetProgramiv(programID, GL_LINK_STATUS, &success);
 
     if (!success)
     {
-        glGetShaderInfoLog(shaderID, 512, NULL, infoLog);
+        glGetProgramInfoLog(programID, 512, nullptr, infoLog);
+        std::cerr << "ERROR::PROGRAM::LINKING FAILED\n" << infoLog << std::endl;
+    }
+
+    glDeleteShader(m_vShaderID);
+}
+
+void Shader::compileShader(const char* vShaderCode, const char* fShaderCode) {
+    m_vShaderID = glCreateShader(GL_VERTEX_SHADER);
+    m_fShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(m_vShaderID, 1, &vShaderCode, nullptr);
+    glShaderSource(m_fShaderID, 1, &fShaderCode, nullptr);
+    glCompileShader(m_vShaderID);
+    glCompileShader(m_fShaderID);
+
+    int  success;
+    char infoLog[512];
+    glGetShaderiv(m_vShaderID, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(m_vShaderID, 512, nullptr, infoLog);
+        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    glGetShaderiv(m_fShaderID, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(m_fShaderID, 512, nullptr, infoLog);
         std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 }
@@ -60,5 +82,5 @@ bool Shader::readFileToString(const std::string& filePath, std::string& fileCont
 }
 
 void Shader::use() {
-    
+    glUseProgram(programID);
 }

@@ -3,19 +3,16 @@
 
 #include <string>
 
-enum class ShaderType {
-	VertexShader,
-	FragmentShader
-};
-
 class Shader {
 public:
-	Shader(const std::string& filePath, const ShaderType shaderType);
+	Shader(const std::string& vFilePath, const std::string& fFilePath);
 	void use();
-	unsigned int shaderID;
+	unsigned int programID;
 private:
 	bool readFileToString(const std::string& filePath, std::string& fileContents);
-	void compileShader(const char* shaderCode, const ShaderType shaderType); 
+	void compileShader(const char* vShaderCode, const char* fShaderCode);
+	void compileProgram();
+	unsigned int m_vShaderID, m_fShaderID;
 };
 
 #endif
