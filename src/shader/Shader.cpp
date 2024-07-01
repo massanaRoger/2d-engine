@@ -84,3 +84,11 @@ bool Shader::readFileToString(const std::string& filePath, std::string& fileCont
 void Shader::use() {
     glUseProgram(programID);
 }
+
+void Shader::setVec2(const char* name, float width, float height) {
+    glUniform2f(glGetUniformLocation(programID, name), width, height);
+}
+
+void Shader::setFloat(const char* name, float x) {
+    glUniform1f(glGetUniformLocation(programID, name), x);
+}

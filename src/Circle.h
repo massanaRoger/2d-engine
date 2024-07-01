@@ -3,37 +3,21 @@
 
 #include <vector>
 
+#include "glm/ext/vector_float3.hpp"
 #include "glm/vec3.hpp"
-
-struct Vertex {
-    float x;
-    float y;
-    float z;
-
-    Vertex(const float x, const float y, const float z);
-};
 
 class Circle {
 public:
-    explicit Circle(std::size_t n);
+    glm::vec3 position;
+    glm::vec3 velocity;
+    float radius;
+    float mass;
+    float inverseMass;
 
-    std::vector<Vertex>& data();
-    void insert(const Vertex& vertex);
-    Vertex& operator[](std::size_t idx);
-    const Vertex& operator[](std::size_t idx) const;
-    std::size_t size();
-    void updateTick(double descentSpeed);
-    glm::vec3 &descentVector();
+    explicit Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, float mass);
 
-    using iterator = std::vector<Vertex>::iterator;
-    using const_iterator = std::vector<Vertex>::const_iterator;
-    iterator begin();
-    [[nodiscard]] const_iterator begin() const;
-    iterator end();
-    [[nodiscard]] const_iterator end() const;
+    static bool checkCollision(const Circle &circle1, const Circle &circle2);
+    static void resolveCollision(Circle &circle1, Circle &circle2);
 
-private:
-    std::vector<Vertex> m_vertices;
-    glm::vec3 m_descentVector;
 };
 #endif

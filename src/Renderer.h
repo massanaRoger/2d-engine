@@ -6,13 +6,13 @@
 
 class Renderer {
 public:
-    Renderer();
+    explicit Renderer(std::vector<Circle>* objects);
     ~Renderer();
-    void draw(double descentSpeed, Shader &shader);
+    void draw(Shader &shader);
     void insertCircle(float centerX, float centerY, float radius, int numSegments);
 private:
-    unsigned int m_VBO, m_VAO;
-    std::vector<Circle> m_programVertices;
+    unsigned int m_VBO, m_VAO, m_EBO;
+    std::vector<Circle>* m_objects;
 };
 
 #endif

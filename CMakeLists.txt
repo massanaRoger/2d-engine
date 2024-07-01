@@ -42,6 +42,7 @@ add_executable(${PROJECT_NAME}
         src/utils.cpp
         src/Circle.cpp
         src/Renderer.cpp
+        src/physics/PhysicsEngine.cpp
 )
 
 # Define the current working directory as a macro

@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 
 #include "utils.h"
+#include "physics/PhysicsEngine.h"
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -18,6 +19,7 @@ constexpr int arraySegmentSize = numSegments + 2;
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 std::unique_ptr<Renderer> renderer;
+std::vector<Circle>* objects = new std::vector<Circle>();
 
 int main()
 {
@@ -47,7 +49,7 @@ int main()
     }
 
     Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
-    renderer = std::make_unique<Renderer>();
+    renderer = std::make_unique<Renderer>(objects);
 
     glViewport(0, 0, 800, 800);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -60,16 +62,21 @@ int main()
         double currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        double descentSpeed = 1.0f * deltaTime;
+
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        shader.setVec2("u_resolution", (float)width, (float)height);
+        PhysicsEngine::update(objects, deltaTime);
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        renderer->draw(descentSpeed, shader);
+        renderer->draw(shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    delete objects;
     glfwTerminate();
     return 0;
 }
@@ -95,7 +102,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         double ndcX, ndcY;
         pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
 
-        float radius = 0.05f;
+        float radius = 0.02f;
         renderer->insertCircle(ndcX, ndcY, radius, numSegments);
     }
 }
