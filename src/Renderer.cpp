@@ -17,19 +17,19 @@ void Renderer::draw(Shader &shader) {
         float y = circle.position.y;
         float r = circle.radius;
 
-        float vertices[] = {
+        /*float vertices[] = {
             x+r, y+r, 0.0f,  // top right
             x+r, y-r, 0.0f,  // bottom right
             x-r, y-r, 0.0f,  // bottom left
             x-r, y+r, 0.0f,   // top left
-       };
+       };*/
 
-        /*float vertices[] = {
+        float vertices[] = {
             1.0f, 1.0f, 0.0f,  // top right
             1.0f, -1.0f, 0.0f,  // bottom right
             -1.0f, -1.0f, 0.0f,  // bottom left
             -1.0f, 1.0f, 0.0f,   // top left
-       };*/
+       };
 
         unsigned int indices[] = {  // note that we start from 0!
             0, 1, 3,   // first triangle
