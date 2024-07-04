@@ -19,7 +19,6 @@ constexpr int arraySegmentSize = numSegments + 2;
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 std::unique_ptr<Renderer> renderer;
-std::vector<Circle>* objects = new std::vector<Circle>();
 
 int main()
 {
@@ -49,7 +48,7 @@ int main()
     }
 
     Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
-    renderer = std::make_unique<Renderer>(objects);
+    renderer = std::make_unique<Renderer>();
 
     glViewport(0, 0, 800, 800);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -66,7 +65,7 @@ int main()
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         shader.setVec2("u_resolution", (float)width, (float)height);
-        PhysicsEngine::update(objects, deltaTime);
+        PhysicsEngine::update(renderer->objects(), deltaTime);
 
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -76,7 +75,6 @@ int main()
         glfwPollEvents();
     }
 
-    delete objects;
     glfwTerminate();
     return 0;
 }
