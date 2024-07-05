@@ -19,6 +19,7 @@ void Circle::draw(Shader& shader) {
 
     shader.setVec2("u_center", position.x, position.y);
     shader.setFloat("u_radius", 0.9f);
+    shader.setInt("u_objType", 1);
 }
 
 void Circle::update(float deltaTime) {

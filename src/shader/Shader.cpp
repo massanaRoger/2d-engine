@@ -92,3 +92,7 @@ void Shader::setVec2(const char* name, float width, float height) {
 void Shader::setFloat(const char* name, float x) {
     glUniform1f(glGetUniformLocation(programID, name), x);
 }
+
+void Shader::setInt(const char* name, int x) {
+    glUniform1i(glGetUniformLocation(programID, name), x);
+}

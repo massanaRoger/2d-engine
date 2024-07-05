@@ -8,6 +8,7 @@ public:
 	Shader(const std::string& vFilePath, const std::string& fFilePath);
 	void setVec2(const char* name, float width, float height);
 	void setFloat(const char* name, float x);
+	void setInt(const char* name, int x);
 	void use();
 	unsigned int programID;
 private:

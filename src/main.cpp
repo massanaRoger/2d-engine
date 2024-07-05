@@ -49,6 +49,7 @@ int main()
 
     Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
     renderer = std::make_unique<Renderer>();
+    renderer->insertAABB(-0.9, -0.9, 0.9, -0.8);
 
     glViewport(0, 0, 800, 800);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);

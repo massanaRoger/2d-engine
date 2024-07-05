@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "AABB.h"
 #include "Circle.h"
 #include "glm/trigonometric.hpp"
 
@@ -47,6 +48,9 @@ Renderer::~Renderer() {
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
+    for (auto &obj : *m_objects) {
+        delete obj;
+    }
     delete m_objects;
 }
 
@@ -73,6 +77,12 @@ Renderer::Renderer(): m_objects(new std::vector<Object*>()) ,m_VAO(-1), m_VBO(-1
 void Renderer::insertCircle(float centerX, float centerY, float radius, int numSegments) {
     auto circle = new Circle(numSegments, radius, glm::vec3(centerX, centerY, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 1.0f);
     m_objects->push_back(circle);
+}
+
+
+void Renderer::insertAABB(float minX, float minY, float maxX, float maxY) {
+    auto aabb = new AABB(minX, minY, maxX, maxY);
+    m_objects->push_back(aabb);
 }
 
 std::vector<Object*>* Renderer::objects() const {
