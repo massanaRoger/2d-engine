@@ -70,13 +70,13 @@ void PhysicsEngine::resolveCollisionCircleCircle(Circle &circle1, Circle &circle
 }
 
 bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb, const Circle &circle) {
-    float closestX = std::max(aabb.min.x, std::min(circle.position.x, aabb.max.x));
-    float closestY = std::max(aabb.min.y, std::min(circle.position.y, aabb.max.y));
+    const float closestX = std::max(aabb.min.x, std::min(circle.position.x, aabb.max.x));
+    const float closestY = std::max(aabb.min.y, std::min(circle.position.y, aabb.max.y));
 
-    float distanceX = circle.position.x - closestX;
-    float distanceY = circle.position.y - closestY;
+    const float distanceX = circle.position.x - closestX;
+    const float distanceY = circle.position.y - closestY;
 
-    float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+    const float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
     return distanceSquared < (circle.radius * circle.radius);
 }
 

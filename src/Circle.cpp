@@ -2,11 +2,13 @@
 
 #include <glad/glad.h>
 
+#include <cmath>
+
 #include "glm/ext/vector_float3.hpp"
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
-Circle::Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, float mass) : radius(radius), position(position), velocity(velocity), mass(mass) {
+Circle::Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, const glm::vec3 &acceleration, float mass, float damping) : radius(radius), position(position), velocity(velocity), acceleration(acceleration), mass(mass), damping(damping) {
     inverseMass = 1 / mass;
 }
 
@@ -24,6 +26,7 @@ void Circle::draw(Shader& shader) {
 
 void Circle::update(float deltaTime) {
     position = position + velocity * deltaTime;
+    velocity = velocity * std::pow(damping, deltaTime) + acceleration * deltaTime;
 }
 
 

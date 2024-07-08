@@ -11,11 +11,13 @@ class Circle: public Object {
 public:
     glm::vec3 position;
     glm::vec3 velocity;
+    glm::vec3 acceleration;
     float radius;
     float mass;
     float inverseMass;
+    float damping;
 
-    explicit Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, float mass);
+    explicit Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, const glm::vec3 &acceleration, float mass, float damping);
 
     void draw(Shader& shader) override;
     void update(float deltaTime) override;
