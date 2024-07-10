@@ -4,11 +4,14 @@
 
 #include "AABB.h"
 #include "Circle.h"
+#include "Polygon.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "Object.h"
+#include "glm/ext/vector_float3.hpp"
 #include "shader/Shader.h"
 
 void Renderer::draw(Shader &shader) {
@@ -27,16 +30,26 @@ void Renderer::draw(Shader &shader) {
     };
 
     for (auto& object : *m_objects) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        if (auto polygon = dynamic_cast<Polygon*>(object)) {
+            glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+            glBufferData(GL_ARRAY_BUFFER, polygon->vertices.size() * sizeof(glm::vec3), polygon->vertices.data(), GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+            object->draw(shader);
 
-        object->draw(shader);
+            glBindVertexArray(m_VAO);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, polygon->vertices.size());
+        } else {
+            glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        glBindVertexArray(m_VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+            object->draw(shader);
+
+            glBindVertexArray(m_VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        }
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -83,6 +96,12 @@ void Renderer::insertAABB(float minX, float minY, float maxX, float maxY) {
     auto aabb = new AABB(minX, minY, maxX, maxY);
     m_objects->push_back(aabb);
 }
+
+void Renderer::insertPolygon(std::initializer_list<glm::vec3> il) {
+    auto polygon = new Polygon(il);
+    m_objects->push_back(polygon);
+}
+
 
 std::vector<Object*>* Renderer::objects() const {
     return m_objects;

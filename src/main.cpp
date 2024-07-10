@@ -48,8 +48,16 @@ int main()
     }
 
     Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
+    Shader polygonShader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
     renderer = std::make_unique<Renderer>();
     renderer->insertAABB(-0.9, -0.9, 0.9, -0.8);
+    renderer->insertPolygon({
+        glm::vec3(-0.8f, 0.6f, 0.0f),
+        glm::vec3(-0.3f, 0.9f, 0.0f),
+        glm::vec3(0.7f, 0.0f, 0.0f),
+        glm::vec3(0.5f, -0.4f, 0.0f),
+        glm::vec3(0.0f, -1.0f, 0.0f)
+    });
 
     glViewport(0, 0, 800, 800);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);

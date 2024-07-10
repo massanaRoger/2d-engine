@@ -11,6 +11,7 @@ public:
     void draw(Shader &shader);
     void insertCircle(float centerX, float centerY, float radius, int numSegments);
     void insertAABB(float minX, float minY, float maxX, float maxY);
+    void insertPolygon(std::initializer_list<glm::vec3> il);
     [[nodiscard]] std::vector<Object*>* objects() const;
 private:
     unsigned int m_VBO, m_VAO, m_EBO;

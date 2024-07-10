@@ -6,6 +6,7 @@
 enum class ObjectType {
     Circle,
     AABB,
+    Polygon,
 };
 
 class Object {
