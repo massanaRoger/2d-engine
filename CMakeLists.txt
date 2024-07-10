@@ -45,6 +45,7 @@ add_executable(${PROJECT_NAME}
         src/physics/PhysicsEngine.cpp
         src/AABB.cpp
         src/Object.cpp
+        src/physics/Manifold.cpp
 )
 
 # Define the current working directory as a macro

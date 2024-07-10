@@ -4,7 +4,6 @@
 
 #include "AABB.h"
 #include "Circle.h"
-#include "glm/trigonometric.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -75,7 +74,7 @@ Renderer::Renderer(): m_objects(new std::vector<Object*>()) ,m_VAO(-1), m_VBO(-1
 }
 
 void Renderer::insertCircle(float centerX, float centerY, float radius, int numSegments) {
-    auto circle = new Circle(numSegments, radius, glm::vec3(centerX, centerY, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 1.0f, 0.5f);
+    auto circle = new Circle(numSegments, radius, glm::vec3(centerX, centerY, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 2.0f, 0.5f);
     m_objects->push_back(circle);
 }
 

@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Manifold.h"
 #include "../AABB.h"
 #include "../Circle.h"
 
@@ -12,7 +13,8 @@ public:
     static bool checkCollisionCircleCircle(const Circle &circle1, const Circle &circle2);
     static void resolveCollisionCircleCircle(Circle &circle1, Circle &circle2);
     static bool checkCollisionAABBCircle(const AABB &aabb, const Circle &circle);
-    static void resolveCollisionAABBCircle(AABB &aabb, Circle &circle);
+    static void resolveCollisionAABBCircle(Manifold &m);
+    static void positionalCorrection(Circle &circle1, Circle &circle2);
 };
 
 #endif
