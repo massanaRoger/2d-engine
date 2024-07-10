@@ -95,7 +95,6 @@ void processInput(GLFWwindow *window)
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        std::cout << "Clicked" << std::endl;
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
         double ndcX, ndcY;
@@ -103,6 +102,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
         float radius = 0.05f;
         renderer->insertCircle(ndcX, ndcY, radius, numSegments);
+    }
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        double ndcX, ndcY;
+        pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
+        float r = 0.05f;
+        renderer->insertAABB(ndcX - r, ndcY - r, ndcX + r, ndcY + r);
     }
 }
 

@@ -21,7 +21,8 @@ void main()
     if (u_objType == 0) {
         float inside = step(u_min.x, uv.x) * step(u_min.y, uv.y) * step(uv.x, u_max.x) * step(uv.y, u_max.y);
         vec3 color = mix(vec3(0.0), vec3(1.0), inside);
-        FragColor = vec4(color, 1.0);
+        FragColor.rgb = color;
+        FragColor.a = inside;
     } else if (u_objType == 1) {
         // Normalize fragment coordinates
         vec2 normCenter = u_center;
