@@ -101,7 +101,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         double ndcX, ndcY;
         pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
 
-        float radius = 0.02f;
+        float radius = 0.05f;
         renderer->insertCircle(ndcX, ndcY, radius, numSegments);
     }
 }

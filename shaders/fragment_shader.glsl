@@ -30,7 +30,7 @@ void main()
         // Calculate the distance from the current fragment to the circle center
         float distance = 1.0 - length(uv - normCenter);
         float fade = 0.005;
-        distance = 1 - smoothstep(u_radius, u_radius - fade, distance);
+        distance = 1 - smoothstep(1 - u_radius, 1 - u_radius - fade, distance);
         FragColor.rgb = vec3(1.0);
         FragColor.a = distance;
     }

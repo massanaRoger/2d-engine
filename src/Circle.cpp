@@ -20,7 +20,7 @@ void Circle::draw(Shader& shader) {
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]);
 
     shader.setVec2("u_center", position.x, position.y);
-    shader.setFloat("u_radius", 0.9f);
+    shader.setFloat("u_radius", radius);
     shader.setInt("u_objType", 1);
 }
 
