@@ -13,12 +13,15 @@ void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void pixelToNDC(GLFWwindow* window, double x, double y, double* ndcX, double* ndcY);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 constexpr int numSegments = 100;
 constexpr int arraySegmentSize = numSegments + 2;
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 std::unique_ptr<Renderer> renderer;
+bool isPointerCursor = false;
+GLFWcursor* pointerCursor = nullptr;
 
 int main()
 {
@@ -48,7 +51,6 @@ int main()
     }
 
     Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
-    Shader polygonShader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
     renderer = std::make_unique<Renderer>();
     renderer->insertAABB(-0.9, -0.9, 0.9, -0.8);
     renderer->insertPolygon({
@@ -62,6 +64,7 @@ int main()
     glViewport(0, 0, 800, 800);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetKeyCallback(window, keyCallback);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -99,6 +102,21 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
     }
 }
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
+        if (isPointerCursor) {
+            glfwSetCursor(window, nullptr);
+        } else {
+            if (!pointerCursor) {
+                pointerCursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+            }
+            glfwSetCursor(window, pointerCursor);
+        }
+        isPointerCursor = !isPointerCursor;
+    }
+}
+
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
