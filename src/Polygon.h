@@ -10,6 +10,7 @@ public:
     std::vector<glm::vec3> vertices;
 
     Polygon(std::initializer_list<glm::vec3> il);
+    explicit Polygon(std::vector<glm::vec3>&& vertices);
     [[nodiscard]] ObjectType getType() const override;
     void draw(Shader& shader) override;
     void update(float deltaTime) override;

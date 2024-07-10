@@ -102,6 +102,11 @@ void Renderer::insertPolygon(std::initializer_list<glm::vec3> il) {
     m_objects->push_back(polygon);
 }
 
+void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
+    auto polygon = new Polygon(std::move(vertices));
+    m_objects->push_back(polygon);
+}
+
 
 std::vector<Object*>* Renderer::objects() const {
     return m_objects;

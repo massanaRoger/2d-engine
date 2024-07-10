@@ -21,6 +21,8 @@ void Polygon::update(float deltaTime) {
 
 Polygon::Polygon(std::initializer_list<glm::vec3> il) : vertices(il) {}
 
+Polygon::Polygon(std::vector<glm::vec3>&& vertices) : vertices(vertices) {}
+
 [[nodiscard]] ObjectType Polygon::getType() const {
     return ObjectType::Polygon;
 }
