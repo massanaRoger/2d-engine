@@ -8,7 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
-Circle::Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, const glm::vec3 &acceleration, float mass, float damping) : radius(radius), position(position), velocity(velocity), acceleration(acceleration), mass(mass), damping(damping) {
+Circle::Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, const glm::vec3 &acceleration, float mass, float damping): radius(radius), position(position), velocity(velocity), acceleration(acceleration), mass(mass), damping(damping) {
     inverseMass = 1 / mass;
 }
 

@@ -98,12 +98,12 @@ void Renderer::insertAABB(float minX, float minY, float maxX, float maxY) {
 }
 
 void Renderer::insertPolygon(std::initializer_list<glm::vec3> il) {
-    auto polygon = new Polygon(il);
+    auto polygon = new Polygon(il, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 0.5f);
     m_objects->push_back(polygon);
 }
 
 void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
-    auto polygon = new Polygon(std::move(vertices));
+    auto polygon = new Polygon(std::move(vertices), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 0.5f);
     m_objects->push_back(polygon);
 }
 
