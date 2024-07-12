@@ -6,6 +6,7 @@
 #include "Manifold.h"
 #include "../AABB.h"
 #include "../Circle.h"
+#include "../Polygon.h"
 
 class PhysicsEngine {
 public:
@@ -15,6 +16,8 @@ public:
     static bool checkCollisionAABBCircle(const AABB &aabb, const Circle &circle);
     static void resolveCollisionAABBCircle(Manifold &m);
     static void positionalCorrection(Circle &circle1, Circle &circle2);
+    static bool checkCollisionPolygonPolygon(const Polygon &p1, const Polygon &p2);
+    static bool checkCollisionPolygonAABB(const Polygon &p, const AABB &aabb);
 };
 
 #endif

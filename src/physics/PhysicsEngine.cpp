@@ -4,10 +4,11 @@
 
 #include "PhysicsEngine.h"
 
-#include <iostream>
-
 #include "Manifold.h"
-#include "glm/detail/func_geometric.inl"
+#include "../Polygon.h"
+
+#include "../utils.h"
+#include <iostream>
 
 void PhysicsEngine::update(std::vector<Object*>* objects, float deltaTime) {
     for (auto& obj : *objects) {
@@ -43,7 +44,23 @@ void PhysicsEngine::update(std::vector<Object*>* objects, float deltaTime) {
                     manifold.AABBvsCircle(*aabb, *circle);
                     resolveCollisionAABBCircle(manifold);
                 }
+            } else if (obj1->getType() == ObjectType::Polygon && obj2->getType() == ObjectType::AABB) {
+                auto* polygon = dynamic_cast<Polygon*>(obj1);
+                auto* aabb = dynamic_cast<AABB*>(obj2);
+
+                if (checkCollisionPolygonAABB(*polygon, *aabb)) {
+                    std::cout << "Collision \n";
+                }
+            } else if (obj1->getType() == ObjectType::AABB && obj2->getType() == ObjectType::Polygon) {
+                auto* aabb = dynamic_cast<AABB*>(obj1);
+                auto* polygon = dynamic_cast<Polygon*>(obj2);
+
+                if (checkCollisionPolygonAABB(*polygon, *aabb)) {
+                    std::cout << "Collision \n";
+                }
             }
+
+
         }
     }
 }
@@ -121,6 +138,47 @@ void PhysicsEngine::resolveCollisionAABBCircle(Manifold &m) {
     if (penetrationDepth > 0) {
         circle->position += collisionNormal * penetrationDepth;
     }
+}
+
+bool PhysicsEngine::checkCollisionPolygonPolygon(const Polygon &p1, const Polygon &p2) {
+    std::vector<glm::vec3> p1Vertices = p1.transformedVertices();
+    std::vector<glm::vec3> p2Vertices = p2.transformedVertices();
+    std::vector<glm::vec3> normals1 = calculateNormals(p1Vertices);
+    std::vector<glm::vec3> normals2 = calculateNormals(p2Vertices);
+
+    for (auto &normal : normals1) {
+        if (!overlapOnAxis(p1Vertices, p2Vertices, normal)) {
+            return false;
+        }
+    }
+
+    for (auto &normal : normals2) {
+        if (!overlapOnAxis(p1Vertices, p2Vertices, normal)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool PhysicsEngine::checkCollisionPolygonAABB(const Polygon &p, const AABB &aabb) {
+    std::vector<glm::vec3> pVertices = p.transformedVertices();
+    std::vector<glm::vec3> normals1 = calculateNormals(pVertices);
+
+    std::vector<glm::vec3> aabbVertices = calculateAABBvertices(aabb.min, aabb.max);
+    std::vector<glm::vec3> normals2 = calculateNormals(aabbVertices);
+
+    for (auto &normal : normals1) {
+        if (!overlapOnAxis(pVertices, aabbVertices, normal)) {
+            return false;
+        }
+    }
+
+    for (auto &normal : normals2) {
+        if (!overlapOnAxis(pVertices, aabbVertices, normal)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 static void positionalCorrection(Circle &circle1, Circle &circle2) {
