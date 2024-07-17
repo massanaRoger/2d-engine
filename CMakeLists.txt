@@ -47,6 +47,9 @@ add_executable(${PROJECT_NAME}
         src/Object.cpp
         src/physics/Manifold.cpp
         src/Polygon.cpp
+        src/Scene.h
+        src/Components.h
+        src/ComponentPool.h
 )
 
 # Define the current working directory as a macro
