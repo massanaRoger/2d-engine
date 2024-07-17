@@ -15,9 +15,13 @@ public:
     float damping;
     glm::mat4 transformMatrix = glm::mat4(1.0f);
     std::vector<glm::vec3> vertices;
+    float inverseMass;
+    float inverseInertia;
+    float angularVelocity = 0.0f;
 
-    Polygon(std::initializer_list<glm::vec3> il, const glm::vec3 &velocity, const glm::vec3 &acceleration, float damping);
-    Polygon(std::vector<glm::vec3>&& vertices, const glm::vec3 &velocity, const glm::vec3 &acceleration, float damping);
+    Polygon(std::initializer_list<glm::vec3> il, const glm::vec3 &velocity, const glm::vec3 &acceleration, float damping, float mass, float inertia);
+    Polygon(std::vector<glm::vec3>&& vertices, const glm::vec3 &velocity, const glm::vec3 &acceleration, float damping, float mass, float inertia);
+
     [[nodiscard]] ObjectType getType() const override;
     void draw(Shader& shader) override;
     void update(float deltaTime) override;

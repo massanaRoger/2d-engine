@@ -3,6 +3,7 @@
 #include "../AABB.h"
 #include "../Circle.h"
 #include "../Object.h"
+#include "../Polygon.h"
 #include "glm/vec3.hpp"
 
 struct Manifold {
@@ -13,7 +14,7 @@ struct Manifold {
 
     bool CirclevsCircle(Circle &circle1, Circle &circle2);
     bool AABBvsCircle(AABB &aabb, Circle &circle);
-
+    bool PolygonvsAABB(Polygon &polygon, AABB &aabb);
 };
 
 #endif

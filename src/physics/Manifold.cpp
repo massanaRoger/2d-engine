@@ -3,8 +3,46 @@
 //
 
 #include "Manifold.h"
+#include "../Polygon.h"
+#include "../utils.h"
+#include <limits>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/norm.hpp"
+
+bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
+    A = &polygon;
+    B = &aabb;
+
+    // Get the vertices of the AABB
+    std::vector<glm::vec3> aabbVertices = {
+        glm::vec3(aabb.min.x, aabb.min.y, 0.0f),
+        glm::vec3(aabb.max.x, aabb.min.y, 0.0f),
+        glm::vec3(aabb.max.x, aabb.max.y, 0.0f),
+        glm::vec3(aabb.min.x, aabb.max.y, 0.0f)
+    };
+
+    std::vector<glm::vec3> normals = calculateNormals(polygon.vertices);
+    normals.emplace_back(1.0f, 0.0f, 0.0f); // AABB's normal (x-axis)
+    normals.emplace_back(0.0f, 1.0f, 0.0f); // AABB's normal (y-axis)
+    
+    float minPenetration = std::numeric_limits<float>::max();
+    glm::vec3 collisionNormal;
+
+    for (const auto& vertexNormal : normals) {
+        float min1, max1, min2, max2;
+        projectPolygon(polygon.vertices, vertexNormal, min1, max1);
+        projectPolygon(aabbVertices, vertexNormal, min2, max2);
+        float penetrationDepth = std::min(max1, max2) - std::max(min1, min2);
+        if (penetrationDepth < minPenetration) {
+            minPenetration = penetrationDepth;
+            collisionNormal = vertexNormal;
+        }
+    }
+
+    normal = collisionNormal;
+    penetration = minPenetration;
+    return true;
+}
 
 bool Manifold::CirclevsCircle(Circle &circle1, Circle &circle2) {
     A = &circle1;

@@ -49,20 +49,61 @@ void PhysicsEngine::update(std::vector<Object*>* objects, float deltaTime) {
                 auto* aabb = dynamic_cast<AABB*>(obj2);
 
                 if (checkCollisionPolygonAABB(*polygon, *aabb)) {
-                    std::cout << "Collision \n";
+                    Manifold manifold{};
+                    manifold.PolygonvsAABB(*polygon, *aabb);
+                    resolveCollisionPolygonAABB(manifold);
                 }
             } else if (obj1->getType() == ObjectType::AABB && obj2->getType() == ObjectType::Polygon) {
                 auto* aabb = dynamic_cast<AABB*>(obj1);
                 auto* polygon = dynamic_cast<Polygon*>(obj2);
 
                 if (checkCollisionPolygonAABB(*polygon, *aabb)) {
-                    std::cout << "Collision \n";
+                    Manifold manifold{};
+                    manifold.PolygonvsAABB(*polygon, *aabb);
+                    resolveCollisionPolygonAABB(manifold);
                 }
             }
 
 
         }
     }
+}
+
+void PhysicsEngine::resolveCollisionPolygonAABB(Manifold &m) {
+    auto polygon = dynamic_cast<Polygon*>(m.A);
+    auto aabb = dynamic_cast<AABB*>(m.B);
+
+    glm::vec3 collisionNormal = m.normal;
+    float penetration = m.penetration;
+
+    // Calculate relative velocity
+    glm::vec3 relativeVelocity = polygon->velocity;
+
+    float velocityAlongNormal = glm::dot(relativeVelocity, collisionNormal);
+    if (velocityAlongNormal > 0) {
+        return;
+    }
+
+    // Calculate restitution
+    float e = 1.0f;  // Assume elasticity (restitution)
+    float j = -(1 + e) * velocityAlongNormal;
+    j /= polygon->inverseMass;
+
+    glm::vec3 impulse = collisionNormal * j;
+    polygon->velocity += impulse * polygon->inverseMass;
+
+    // Calculate the point of collision (assuming center of mass for simplicity)
+    glm::vec3 r = collisionNormal * penetration;
+    glm::vec3 angularImpulse = glm::cross(r, impulse);
+
+    // Apply angular impulse
+    polygon->angularVelocity += angularImpulse.z * polygon->inverseInertia;
+
+    // Positional correction to avoid sinking
+    const float percent = 0.8f; // usually 20% to 80%
+    const float slop = 0.01f; // usually 0.01 to 0.1
+    glm::vec3 correction = std::max(penetration - slop, 0.0f) / polygon->inverseMass * percent * collisionNormal;
+    polygon->transVertices += correction;
 }
 
 bool PhysicsEngine::checkCollisionCircleCircle(const Circle &circle1, const Circle &circle2) {

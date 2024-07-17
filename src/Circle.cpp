@@ -29,7 +29,6 @@ void Circle::update(float deltaTime) {
     velocity = velocity * std::pow(damping, deltaTime) + acceleration * deltaTime;
 }
 
-
 [[nodiscard]] ObjectType Circle::getType() const {
     return ObjectType::Circle;
 }
