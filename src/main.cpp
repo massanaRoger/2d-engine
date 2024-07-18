@@ -1,5 +1,3 @@
-#include "Renderer.h"
-#include "shader/Shader.h"
 #include <iostream>
 #include <memory>
 #include <glad/glad.h>
@@ -8,6 +6,10 @@
 
 #include "utils.h"
 #include "physics/PhysicsEngine.h"
+#include "Scene.h"
+#include "Renderer.h"
+#include "components/Components.h"
+#include "shader/Shader.h"
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -15,8 +17,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void pixelToNDC(GLFWwindow* window, double x, double y, double* ndcX, double* ndcY);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-constexpr int numSegments = 100;
-constexpr int arraySegmentSize = numSegments + 2;
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 std::unique_ptr<Renderer> renderer;
@@ -52,6 +52,18 @@ int main()
     }
 
     Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"), getFullPath("shaders/fragment_shader.glsl"));
+
+    Scene scene;
+    EntityID circle = scene.NewEntity();
+    auto* positionComponent = scene.Assign<PositionComponent>(circle);
+    // VelocityComponent* velocityComponent = scene.Assign<VelocityComponent>(circle);
+    // AccelerationComponent* accelerationComponent = scene.Assign<AccelerationComponent>(circle);
+    // MassComponent* massComponent = scene.Assign<MassComponent>(circle);
+    auto* circleComponent = scene.Assign<CircleComponent>(circle);
+
+    positionComponent->position = glm::vec3(0.5f, 0.5f, 0.0f);
+    circleComponent->radius = 0.2f;
+
     renderer = std::make_unique<Renderer>();
     renderer->insertAABB(-0.9, -0.9, 0.9, -0.8);
 
@@ -76,6 +88,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         renderer->draw(shader);
+        renderer->drawECS(shader, scene);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -125,7 +138,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
 
         float radius = 0.05f;
-        renderer->insertCircle(ndcX, ndcY, radius, numSegments);
+        renderer->insertCircle(ndcX, ndcY, radius);
     }
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && isPointerCursor) {
         double xpos, ypos;

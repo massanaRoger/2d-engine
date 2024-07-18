@@ -3,7 +3,7 @@
 #include <vector>
 #include <bitset>
 
-#include "Components.h"
+#include "component.h"
 #include "ComponentPool.h"
 
 typedef unsigned long long EntityID;
@@ -40,7 +40,8 @@ struct Scene {
         ComponentMask mask;
     };
     std::vector<EntityDesc> entities;
-    std::vector<ComponentPool> componentPools;
+    std::vector<ComponentPool*> componentPools;
+    std::vector<EntityID> freeEntities;
 
     EntityID NewEntity() {
         if (!freeEntities.empty()) {
@@ -51,12 +52,6 @@ struct Scene {
         }
         entities.push_back({ CreateEntityId(EntityIndex(entities.size()), 0), ComponentMask() });
         return entities.back().id;
-    }
-
-    template<typename T>
-    void Assign(EntityID id) {
-        int componentId = GetId<T>();
-        entities[GetEntityIndex(id)].mask.set(componentId);
     }
 
     template<typename T>
@@ -74,7 +69,7 @@ struct Scene {
         }
 
         // Looks up the component in the pool, and initializes it with placement new
-        T* pComponent = new (componentPools[componentId].get(GetEntityIndex(id))) T();
+        T* pComponent = new (componentPools[componentId]->get(GetEntityIndex(id))) T();
 
         // Set the bit for the component to true
         entities[GetEntityIndex(id)].mask.set(componentId);
@@ -88,7 +83,7 @@ struct Scene {
             return nullptr;
         }
 
-        T* pComponent = static_cast<T*>(componentPools[componentId].get(GetEntityIndex(id)));
+        T* pComponent = static_cast<T*>(componentPools[componentId]->get(GetEntityIndex(id)));
         return pComponent;
     }
 

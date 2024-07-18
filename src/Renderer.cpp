@@ -11,8 +11,52 @@
 #include <glm/glm.hpp>
 
 #include "Object.h"
+#include "Scene.h"
+#include "SceneView.h"
+#include "components/Components.h"
+#include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
 #include "shader/Shader.h"
+
+void Renderer::drawECS(Shader &shader, Scene &scene) {
+    shader.use();
+
+    float vertices[] = {
+        1.0f, 1.0f, 0.0f,  // top right
+        1.0f, -1.0f, 0.0f,  // bottom right
+        -1.0f, -1.0f, 0.0f,  // bottom left
+        -1.0f, 1.0f, 0.0f,   // top left
+   };
+
+    unsigned int indices[] = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+
+    for (EntityID ent : SceneView<PositionComponent, CircleComponent>(&scene)) {
+        glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        auto* positionComponent = scene.Get<PositionComponent>(ent);
+        auto* circleComponent = scene.Get<CircleComponent>(ent);
+
+        auto transformMatrix = glm::mat4(1.0f);
+        transformMatrix = glm::translate(transformMatrix, positionComponent->position);
+
+        GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transformMatrix[0][0]);
+
+        shader.setVec2("u_center", positionComponent->position.x, positionComponent->position.y);
+        shader.setFloat("u_radius", circleComponent->radius);
+        shader.setInt("u_objType", 1);
+
+        glBindVertexArray(m_VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
 
 void Renderer::draw(Shader &shader) {
     shader.use();
@@ -86,8 +130,8 @@ Renderer::Renderer(): m_objects(new std::vector<Object*>()) ,m_VAO(-1), m_VBO(-1
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void Renderer::insertCircle(float centerX, float centerY, float radius, int numSegments) {
-    auto circle = new Circle(numSegments, radius, glm::vec3(centerX, centerY, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 2.0f, 0.5f);
+void Renderer::insertCircle(float centerX, float centerY, float radius) {
+    auto circle = new Circle(radius, glm::vec3(centerX, centerY, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 2.0f, 0.5f);
     m_objects->push_back(circle);
 }
 

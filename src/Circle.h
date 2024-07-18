@@ -17,7 +17,7 @@ public:
     float inverseMass;
     float damping;
 
-    explicit Circle(std::size_t n, float radius, const glm::vec3 &position, const glm::vec3 &velocity, const glm::vec3 &acceleration, float mass, float damping);
+    explicit Circle(float radius, const glm::vec3 &position, const glm::vec3 &velocity, const glm::vec3 &acceleration, float mass, float damping);
 
     void draw(Shader& shader) override;
     void update(float deltaTime) override;
