@@ -25,8 +25,8 @@ struct CircleComponent {
 };
 
 struct AABBComponent {
-    float width{0.0f};
-    float height{0.0f};
+    glm::vec3 min{0.0f};
+    glm::vec3 max{0.0f};
 };
 
 struct PolygonComponent {

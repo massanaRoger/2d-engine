@@ -7,18 +7,17 @@
 #include "../utils.h"
 #include <limits>
 #define GLM_ENABLE_EXPERIMENTAL
+
 #include "glm/gtx/norm.hpp"
 
 bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
-    A = &polygon;
-    B = &aabb;
 
     // Get the vertices of the AABB
     std::vector<glm::vec3> aabbVertices = {
-        glm::vec3(aabb.min.x, aabb.min.y, 0.0f),
-        glm::vec3(aabb.max.x, aabb.min.y, 0.0f),
-        glm::vec3(aabb.max.x, aabb.max.y, 0.0f),
-        glm::vec3(aabb.min.x, aabb.max.y, 0.0f)
+        glm::vec3(aabb.aabbc.min.x, aabb.aabbc.min.y, 0.0f),
+        glm::vec3(aabb.aabbc.max.x, aabb.aabbc.min.y, 0.0f),
+        glm::vec3(aabb.aabbc.max.x, aabb.aabbc.max.y, 0.0f),
+        glm::vec3(aabb.aabbc.min.x, aabb.aabbc.max.y, 0.0f)
     };
 
     std::vector<glm::vec3> normals = calculateNormals(polygon.vertices);
@@ -45,11 +44,9 @@ bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
 }
 
 bool Manifold::CirclevsCircle(Circle &circle1, Circle &circle2) {
-    A = &circle1;
-    B = &circle2;
     // Vector from A to B
-    glm::vec3 n = circle2.position - circle1.position;
-    float r = circle1.radius + circle2.radius;
+    glm::vec3 n = circle2.pc.position - circle1.pc.position;
+    float r = circle1.cc.radius + circle2.cc.radius;
     r *= r;
     if(glm::length2(n) > r)
         return false;
@@ -69,23 +66,21 @@ bool Manifold::CirclevsCircle(Circle &circle1, Circle &circle2) {
     else
     {
         // Choose random (but consistent) values
-        penetration = circle1.radius;
+        penetration = circle1.cc.radius;
         normal = glm::vec3(1.0f, 0.0f, 0.0f);
         return true;
     }
 }
 
 bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
-    A = &aabb;
-    B = &circle;
-    glm::vec3 aabbCenter = glm::vec3((aabb.min + aabb.max) / 2.0f, 0.0f);
-    glm::vec3 n = aabbCenter - circle.position;
+    glm::vec3 aabbCenter = glm::vec3((aabb.aabbc.min + aabb.aabbc.max) / 2.0f);
+    glm::vec3 n = aabbCenter - circle.pc.position;
 
     // Closest point on A to center of B
     glm::vec3 closest = n;
     // Calculate half extents along each axis
-    float x_extent = (aabb.max.x - aabb.min.x) / 2;
-    float y_extent = (aabb.max.y - aabb.min.y) / 2;
+    float x_extent = (aabb.aabbc.max.x - aabb.aabbc.min.x) / 2;
+    float y_extent = (aabb.aabbc.max.y - aabb.aabbc.min.y) / 2;
     // Clamp point to edges of the AABB
     closest.x = glm::clamp(-x_extent, x_extent, closest.x);
     closest.y = glm::clamp(-y_extent,y_extent, closest.y);
@@ -116,7 +111,7 @@ bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
     }
     glm::vec3 tempNorm = n - closest;
     float d = glm::length2(tempNorm);
-    float r = circle.radius;
+    float r = circle.cc.radius;
     // Early out of the radius is shorter than distance to closest point and
     // Circle not inside the AABB
     if(d > r * r && !inside)

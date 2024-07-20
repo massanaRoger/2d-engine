@@ -7,8 +7,6 @@
 #include "glm/vec3.hpp"
 
 struct Manifold {
-    Object *A;
-    Object *B;
     float penetration;
     glm::vec3 normal;
 

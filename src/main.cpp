@@ -38,6 +38,10 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
   GLFWwindow *window;
   window = glfwCreateWindow(800, 800, "ZMMR", nullptr, nullptr);
   if (window == nullptr) {
@@ -53,18 +57,6 @@ int main() {
 
   Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"),
                          getFullPath("shaders/fragment_shader.glsl"));
-
-  Scene scene;
-  EntityID circle = scene.NewEntity();
-  auto *positionComponent = scene.Assign<PositionComponent>(circle);
-  auto *velocityComponent = scene.Assign<VelocityComponent>(circle);
-  auto *accelerationComponent = scene.Assign<AccelerationComponent>(circle);
-  // MassComponent* massComponent = scene.Assign<MassComponent>(circle);
-  auto *circleComponent = scene.Assign<CircleComponent>(circle);
-
-  positionComponent->position = glm::vec3(0.5f, 0.5f, 0.0f);
-  accelerationComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
-  circleComponent->radius = 0.2f;
 
   renderer = std::make_unique<Renderer>();
   renderer->insertAABB(-0.9, -0.9, 0.9, -0.8);
@@ -84,13 +76,11 @@ int main() {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     shader.setVec2("u_resolution", (float)width, (float)height);
-    PhysicsEngine::update(renderer->objects(), deltaTime);
-    PhysicsEngine::updateECS(scene, deltaTime);
+    renderer->update(deltaTime);
 
     glClear(GL_COLOR_BUFFER_BIT);
 
     renderer->draw(shader);
-    renderer->drawECS(shader, scene);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

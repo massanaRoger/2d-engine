@@ -2,18 +2,15 @@
 #define AABB_H
 #include "glm/vec2.hpp"
 #include "Object.h"
+#include "components/Components.h"
 
-class AABB: public Object {
-public:
-    glm::vec2 min;
-    glm::vec2 max;
+struct AABB {
+    AABBComponent aabbc;
+    MassComponent mc;
 
-    AABB(glm::vec2 &min, glm::vec2 &max);
-    AABB(float minX, float minY, float maxX, float maxY);
+    AABB(AABBComponent &aabbc, MassComponent &mass);
 
-    void draw(Shader& shader) override;
-    void update(float deltaTime) override;
-    [[nodiscard]] ObjectType getType() const override;
+    void draw(Shader& shader);
 };
 
 

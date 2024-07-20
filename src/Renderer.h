@@ -10,13 +10,15 @@ public:
     explicit Renderer();
     ~Renderer();
     void draw(Shader &shader);
+
     void insertCircle(float centerX, float centerY, float radius);
     void insertAABB(float minX, float minY, float maxX, float maxY);
     void insertPolygon(std::initializer_list<glm::vec3> il);
     void insertPolygon(std::vector<glm::vec3>&& vertices);
-    void drawECS(Shader &shader, Scene &scene);
+    void update(float deltaTime);
     [[nodiscard]] std::vector<Object*>* objects() const;
 private:
+    Scene m_scene;
     unsigned int m_VBO, m_VAO, m_EBO;
     std::vector<Object*>* m_objects;
 };

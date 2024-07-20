@@ -6,22 +6,15 @@
 #include "glm/ext/vector_float3.hpp"
 #include "glm/vec3.hpp"
 #include "Object.h"
+#include "components/Components.h"
 
-class Circle: public Object {
-public:
-    glm::vec3 position;
-    glm::vec3 velocity;
-    glm::vec3 acceleration;
-    float radius;
-    float mass;
-    float inverseMass;
-    float damping;
+struct Circle {
+    PositionComponent pc;
+    VelocityComponent vc;
+    AccelerationComponent ac;
+    CircleComponent cc;
+    MassComponent mc;
 
-    explicit Circle(float radius, const glm::vec3 &position, const glm::vec3 &velocity, const glm::vec3 &acceleration, float mass, float damping);
-
-    void draw(Shader& shader) override;
-    void update(float deltaTime) override;
-    [[nodiscard]] ObjectType getType() const override;
-
+    Circle(PositionComponent &pos, VelocityComponent &vel, AccelerationComponent &acc, MassComponent &mass, CircleComponent &circle);
 };
 #endif
