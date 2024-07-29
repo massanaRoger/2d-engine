@@ -184,6 +184,60 @@ void Renderer::update(float deltaTime) {
             }
         }
     }
+
+    // Check collision aabb polygon
+    for (EntityID aabbEntity : SceneView<AABBComponent, MassComponent>(&m_scene)) {
+        auto aabbComp = m_scene.Get<AABBComponent>(aabbEntity);
+        auto aabbMass = m_scene.Get<MassComponent>(aabbEntity);
+
+        AABB aabb(aabbComp, aabbMass);
+
+        for (EntityID pEntity : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent, MassComponent, AngularVelocityComponent, AngularAccelerationComponent>(&m_scene)) {
+            auto polygonComp = m_scene.Get<PolygonComponent>(pEntity);
+            auto pVel = m_scene.Get<VelocityComponent>(pEntity);
+            auto pAcc = m_scene.Get<AccelerationComponent>(pEntity);
+            auto pMass = m_scene.Get<MassComponent>(pEntity);
+            auto pAngVel = m_scene.Get<AngularVelocityComponent>(pEntity);
+            auto pAngAcc = m_scene.Get<AngularAccelerationComponent>(pEntity);
+
+            Polygon polygon(pVel, pAcc, pMass, polygonComp, pAngVel, pAngAcc);
+
+            if (PhysicsEngine::checkCollisionPolygonAABB(polygon, aabb)) {
+                Manifold m{};
+                m.PolygonvsAABB(polygon, aabb);
+                PhysicsEngine::resolveCollisionPolygonAABB(m, polygon);
+            }
+        }
+    }
+
+/*
+    // Check collision circle polygon
+    for (EntityID cEntity : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
+        auto circleComp = m_scene.Get<CircleComponent>(cEntity);
+        auto cPos = m_scene.Get<PositionComponent>(cEntity);
+        auto cVel = m_scene.Get<VelocityComponent>(cEntity);
+        auto cAcc = m_scene.Get<AccelerationComponent>(cEntity);
+        auto cMass = m_scene.Get<MassComponent>(cEntity);
+
+        Circle circle(cPos, cVel, cAcc, cMass, circleComp);
+
+        for (EntityID pEntity : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent, MassComponent, AngularVelocityComponent, AngularAccelerationComponent>(&m_scene)) {
+            auto polygonComp = m_scene.Get<PolygonComponent>(pEntity);
+            auto pVel = m_scene.Get<VelocityComponent>(pEntity);
+            auto pAcc = m_scene.Get<AccelerationComponent>(pEntity);
+            auto pMass = m_scene.Get<MassComponent>(pEntity);
+            auto pAngVel = m_scene.Get<AngularVelocityComponent>(pEntity);
+            auto pAngAcc = m_scene.Get<AngularAccelerationComponent>(pEntity);
+
+            Polygon polygon(pVel, pAcc, pMass, polygonComp, pAngVel, pAngAcc);
+
+            if (PhysicsEngine::checkCollisionPolygonAABB(polygon, circle)) {
+                Manifold m{};
+                m.AABBvsCircle(aabb, circle);
+                PhysicsEngine::resolveCollisionAABBCircle(m, aabb, circle);
+            }
+        }
+    }*/
 }
 
 Renderer::~Renderer() {
