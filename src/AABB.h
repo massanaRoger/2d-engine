@@ -5,12 +5,10 @@
 #include "components/Components.h"
 
 struct AABB {
-    AABBComponent aabbc;
-    MassComponent mc;
+    AABBComponent* aabbc;
+    MassComponent* mc;
 
-    AABB(AABBComponent &aabbc, MassComponent &mass);
-
-    void draw(Shader& shader);
+    AABB(AABBComponent* aabbc, MassComponent* mass);
 };
 
 

@@ -9,12 +9,12 @@
 #include "components/Components.h"
 
 struct Circle {
-    PositionComponent pc;
-    VelocityComponent vc;
-    AccelerationComponent ac;
-    CircleComponent cc;
-    MassComponent mc;
+    PositionComponent *pc;
+    VelocityComponent *vc;
+    AccelerationComponent *ac;
+    CircleComponent *cc;
+    MassComponent *mc;
 
-    Circle(PositionComponent &pos, VelocityComponent &vel, AccelerationComponent &acc, MassComponent &mass, CircleComponent &circle);
+    Circle(PositionComponent *pos, VelocityComponent *vel, AccelerationComponent *acc, MassComponent *mass, CircleComponent *circle);
 };
 #endif

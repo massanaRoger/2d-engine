@@ -124,8 +124,8 @@ void Renderer::update(float deltaTime) {
                 auto acc2 = m_scene.Get<AccelerationComponent>(e2);
                 auto mass2 = m_scene.Get<MassComponent>(e2);
 
-                Circle circle1(*pos1, *vel1, *acc1, *mass1, *circleComponent1);
-                Circle circle2(*pos2, *vel2, *acc2, *mass2, *circleComponent2);
+                Circle circle1(pos1, vel1, acc1, mass1, circleComponent1);
+                Circle circle2(pos2, vel2, acc2, mass2, circleComponent2);
 
                 if (PhysicsEngine::checkCollisionCircleCircle(circle1, circle2)) {
                     PhysicsEngine::resolveCollisionCircleCircle(circle1, circle2);
@@ -139,13 +139,14 @@ void Renderer::update(float deltaTime) {
 
                 auto aabb2 = m_scene.Get<AABBComponent>(e2);
                 auto mass2 = m_scene.Get<MassComponent>(e2);
-                Circle circle(*pos1, *vel1, *acc1, *mass1, *circleComponent1);
-                AABB aabb(*aabb2, *mass2);
+                Circle circle(pos1, vel1, acc1, mass1, circleComponent1);
+                AABB aabb(aabb2, mass2);
 
                 if (PhysicsEngine::checkCollisionAABBCircle(aabb, circle)) {
                     Manifold m{};
                     m.AABBvsCircle(aabb, circle);
                     PhysicsEngine::resolveCollisionAABBCircle(m, aabb, circle);
+
                 }
             }
             if (aabbComponent1 && circleComponent2) {
@@ -158,8 +159,8 @@ void Renderer::update(float deltaTime) {
                 auto acc2 = m_scene.Get<AccelerationComponent>(e2);
                 auto mass2 = m_scene.Get<MassComponent>(e2);
 
-                AABB aabb(*aabb1, *mass1);
-                Circle circle(*pos2, *vel2, *acc2, *mass2, *circleComponent2);
+                AABB aabb(aabb1, mass1);
+                Circle circle(pos2, vel2, acc2, mass2, circleComponent2);
 
                 if (PhysicsEngine::checkCollisionAABBCircle(aabb, circle)) {
                     Manifold m{};
@@ -249,10 +250,12 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
     auto *positionComponent = m_scene.Assign<PositionComponent>(circle);
     auto *velocityComponent = m_scene.Assign<VelocityComponent>(circle);
     auto *accelerationComponent = m_scene.Assign<AccelerationComponent>(circle);
-    auto * massComponent = m_scene.Assign<MassComponent>(circle);
+    auto *massComponent = m_scene.Assign<MassComponent>(circle);
     auto *circleComponent = m_scene.Assign<CircleComponent>(circle);
 
     positionComponent->position = glm::vec3(centerX, centerY, 0.0f);
+    velocityComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    massComponent->inverseMass = 1.0f;
     accelerationComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
     circleComponent->radius = radius;
 }
@@ -264,6 +267,7 @@ void Renderer::insertAABB(float minX, float minY, float maxX, float maxY) {
     auto *massComponent = m_scene.Assign<MassComponent>(aabb);
     aabbComponent->min = glm::vec3(minX, minY, 0.0f);
     aabbComponent->max = glm::vec3(maxX, maxY, 0.0f);
+    massComponent->inverseMass = 1.0f;
 }
 
 void Renderer::insertPolygon(std::initializer_list<glm::vec3> il) {

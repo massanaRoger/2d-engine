@@ -53,19 +53,19 @@ void PhysicsEngine::resolveCollisionPolygonAABB(Manifold &m) {
 
 bool PhysicsEngine::checkCollisionCircleCircle(const Circle &circle1,
                                                const Circle &circle2) {
-  float r = circle1.cc.radius + circle2.cc.radius;
+  float r = circle1.cc->radius + circle2.cc->radius;
   r *= r;
-  float dx = circle1.pc.position.x - circle2.pc.position.x;
-  float dy = circle1.pc.position.y - circle2.pc.position.y;
+  float dx = circle1.pc->position.x - circle2.pc->position.x;
+  float dy = circle1.pc->position.y - circle2.pc->position.y;
   float circleDistance = dx * dx + dy * dy;
   return circleDistance < r;
 }
 
 void PhysicsEngine::resolveCollisionCircleCircle(Circle &circle1,
                                                  Circle &circle2) {
-  glm::vec3 collisionNormal = circle2.pc.position - circle1.pc.position;
+  glm::vec3 collisionNormal = circle2.pc->position - circle1.pc->position;
   collisionNormal = glm::normalize(collisionNormal);
-  glm::vec3 relativeVelocity = circle2.vc.velocity - circle1.vc.velocity;
+  glm::vec3 relativeVelocity = circle2.vc->velocity - circle1.vc->velocity;
 
   float velocityAlongNormal = glm::dot(relativeVelocity, collisionNormal);
   if (velocityAlongNormal > 0) {
@@ -76,40 +76,40 @@ void PhysicsEngine::resolveCollisionCircleCircle(Circle &circle1,
   float e = 1.0f; // You might want to make this a property of the circles if
                   // different circles have different restitution values
   float j = -(1 + e) * velocityAlongNormal;
-  j /= (circle1.mc.inverseMass + circle2.mc.inverseMass);
+  j /= (circle1.mc->inverseMass + circle2.mc->inverseMass);
 
   glm::vec3 impulse = collisionNormal * j;
-  circle1.vc.velocity = circle1.vc.velocity - impulse * circle1.mc.inverseMass;
-  circle2.vc.velocity = circle2.vc.velocity + impulse * circle2.mc.inverseMass;
+  circle1.vc->velocity = circle1.vc->velocity - impulse * circle1.mc->inverseMass;
+  circle2.vc->velocity = circle2.vc->velocity + impulse * circle2.mc->inverseMass;
 }
 
 bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb,
                                              const Circle &circle) {
   const float closestX =
-      std::max(aabb.aabbc.min.x, std::min(circle.pc.position.x, aabb.aabbc.max.x));
+      std::max(aabb.aabbc->min.x, std::min(circle.pc->position.x, aabb.aabbc->max.x));
   const float closestY =
-      std::max(aabb.aabbc.min.y, std::min(circle.pc.position.y, aabb.aabbc.max.y));
+      std::max(aabb.aabbc->min.y, std::min(circle.pc->position.y, aabb.aabbc->max.y));
 
-  const float distanceX = circle.pc.position.x - closestX;
-  const float distanceY = circle.pc.position.y - closestY;
+  const float distanceX = circle.pc->position.x - closestX;
+  const float distanceY = circle.pc->position.y - closestY;
 
   const float distanceSquared =
       (distanceX * distanceX) + (distanceY * distanceY);
-  return distanceSquared < (circle.cc.radius * circle.cc.radius);
+  return distanceSquared < (circle.cc->radius * circle.cc->radius);
 }
 
 void PhysicsEngine::resolveCollisionAABBCircle(Manifold &m, AABB &aabb, Circle &circle) {
   glm::vec3 closestPoint;
   closestPoint.x =
-      std::max(aabb.aabbc.min.x, std::min(circle.pc.position.x, aabb.aabbc.max.x));
+      std::max(aabb.aabbc->min.x, std::min(circle.pc->position.x, aabb.aabbc->max.x));
   closestPoint.y =
-      std::max(aabb.aabbc.min.y, std::min(circle.pc.position.y, aabb.aabbc.max.y));
+      std::max(aabb.aabbc->min.y, std::min(circle.pc->position.y, aabb.aabbc->max.y));
   closestPoint.z = 0; // Assuming 2D collision
 
-  glm::vec3 collisionNormal = circle.pc.position - closestPoint;
+  glm::vec3 collisionNormal = circle.pc->position - closestPoint;
   collisionNormal = glm::normalize(collisionNormal);
 
-  glm::vec3 relativeVelocity = circle.vc.velocity;
+  glm::vec3 relativeVelocity = circle.vc->velocity;
 
   float velocityAlongNormal = glm::dot(relativeVelocity, collisionNormal);
   if (velocityAlongNormal > 0) {
@@ -119,16 +119,16 @@ void PhysicsEngine::resolveCollisionAABBCircle(Manifold &m, AABB &aabb, Circle &
   // Calculate restitution
   float e = 1.0f;
   float j = -(1 + e) * velocityAlongNormal;
-  j /= circle.mc.inverseMass;
+  j /= circle.mc->inverseMass;
 
   glm::vec3 impulse = collisionNormal * j;
-  circle.vc.velocity = circle.vc.velocity + impulse * circle.mc.inverseMass;
+  circle.vc->velocity = circle.vc->velocity + impulse * circle.mc->inverseMass;
 
   // Ensure the circle is pushed out of the AABB
   float penetrationDepth =
-      circle.cc.radius - glm::length(circle.pc.position - closestPoint);
+      circle.cc->radius - glm::length(circle.pc->position - closestPoint);
   if (penetrationDepth > 0) {
-    circle.pc.position += collisionNormal * penetrationDepth;
+    circle.pc->position += collisionNormal * penetrationDepth;
   }
 }
 
@@ -159,7 +159,7 @@ bool PhysicsEngine::checkCollisionPolygonAABB(const Polygon &p,
   std::vector<glm::vec3> normals1 = calculateNormals(pVertices);
 
   std::vector<glm::vec3> aabbVertices =
-      calculateAABBvertices(aabb.aabbc.min, aabb.aabbc.max);
+      calculateAABBvertices(aabb.aabbc->min, aabb.aabbc->max);
   std::vector<glm::vec3> normals2 = calculateNormals(aabbVertices);
 
   for (auto &normal : normals1) {
