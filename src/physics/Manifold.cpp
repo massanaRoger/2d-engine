@@ -20,7 +20,7 @@ bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
         glm::vec3(aabb.aabbc->min.x, aabb.aabbc->max.y, 0.0f)
     };
 
-    std::vector<glm::vec3> normals = calculateNormals(polygon.vertices);
+    std::vector<glm::vec3> normals = calculateNormals(polygon.pc->vertices);
     normals.emplace_back(1.0f, 0.0f, 0.0f); // AABB's normal (x-axis)
     normals.emplace_back(0.0f, 1.0f, 0.0f); // AABB's normal (y-axis)
     
@@ -29,7 +29,7 @@ bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
 
     for (const auto& vertexNormal : normals) {
         float min1, max1, min2, max2;
-        projectPolygon(polygon.vertices, vertexNormal, min1, max1);
+        projectPolygon(polygon.pc->vertices, vertexNormal, min1, max1);
         projectPolygon(aabbVertices, vertexNormal, min2, max2);
         float penetrationDepth = std::min(max1, max2) - std::max(min1, min2);
         if (penetrationDepth < minPenetration) {

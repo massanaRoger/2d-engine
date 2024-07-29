@@ -5,23 +5,19 @@
 #include "PhysicsEngine.h"
 
 #include "../Polygon.h"
-#include "../Scene.h"
-#include "../SceneView.h"
 #include "../components/Components.h"
 #include "Manifold.h"
 
 #include "../utils.h"
 #include <cmath>
-#include <iostream>
 
-/*
-void PhysicsEngine::resolveCollisionPolygonAABB(Manifold &m) {
+void PhysicsEngine::resolveCollisionPolygonAABB(Manifold &m, Polygon &polygon) {
 
   glm::vec3 collisionNormal = m.normal;
   float penetration = m.penetration;
 
   // Calculate relative velocity
-  glm::vec3 relativeVelocity = polygon->velocity;
+  glm::vec3 relativeVelocity = polygon.vc->velocity;
 
   float velocityAlongNormal = glm::dot(relativeVelocity, collisionNormal);
   if (velocityAlongNormal > 0) {
@@ -31,25 +27,28 @@ void PhysicsEngine::resolveCollisionPolygonAABB(Manifold &m) {
   // Calculate restitution
   float e = 1.0f; // Assume elasticity (restitution)
   float j = -(1 + e) * velocityAlongNormal;
-  j /= polygon->inverseMass;
+  j /= polygon.mc->inverseMass;
 
   glm::vec3 impulse = collisionNormal * j;
-  polygon->velocity += impulse * polygon->inverseMass;
+  polygon.vc->velocity += impulse * polygon.mc->inverseMass;
 
   // Calculate the point of collision (assuming center of mass for simplicity)
   glm::vec3 r = collisionNormal * penetration;
   glm::vec3 angularImpulse = glm::cross(r, impulse);
 
   // Apply angular impulse
-  polygon->angularVelocity += angularImpulse.z * polygon->inverseInertia;
+  // polygon.avc->angularVelocity += angularImpulse.z * polygon.ic->inverseInertia;
 
   // Positional correction to avoid sinking
   const float percent = 0.8f; // usually 20% to 80%
   const float slop = 0.01f;   // usually 0.01 to 0.1
   glm::vec3 correction = std::max(penetration - slop, 0.0f) /
-                         polygon->inverseMass * percent * collisionNormal;
-  polygon->transVertices += correction;
-}*/
+                         polygon.mc->inverseMass * percent * collisionNormal;
+
+  for (auto &v : polygon.pc->vertices) {
+    v += correction;
+  }
+}
 
 bool PhysicsEngine::checkCollisionCircleCircle(const Circle &circle1,
                                                const Circle &circle2) {
@@ -134,8 +133,8 @@ void PhysicsEngine::resolveCollisionAABBCircle(Manifold &m, AABB &aabb, Circle &
 
 bool PhysicsEngine::checkCollisionPolygonPolygon(const Polygon &p1,
                                                  const Polygon &p2) {
-  std::vector<glm::vec3> p1Vertices = p1.transformedVertices();
-  std::vector<glm::vec3> p2Vertices = p2.transformedVertices();
+  std::vector<glm::vec3> p1Vertices = p1.pc->vertices;
+  std::vector<glm::vec3> p2Vertices = p2.pc->vertices;
   std::vector<glm::vec3> normals1 = calculateNormals(p1Vertices);
   std::vector<glm::vec3> normals2 = calculateNormals(p2Vertices);
 
@@ -155,7 +154,7 @@ bool PhysicsEngine::checkCollisionPolygonPolygon(const Polygon &p1,
 
 bool PhysicsEngine::checkCollisionPolygonAABB(const Polygon &p,
                                               const AABB &aabb) {
-  std::vector<glm::vec3> pVertices = p.transformedVertices();
+  std::vector<glm::vec3> pVertices = p.pc->vertices;
   std::vector<glm::vec3> normals1 = calculateNormals(pVertices);
 
   std::vector<glm::vec3> aabbVertices =

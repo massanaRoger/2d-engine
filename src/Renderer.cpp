@@ -78,6 +78,25 @@ void Renderer::draw(Shader &shader) {
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     }
 
+    for (EntityID ent : SceneView<PolygonComponent>(&m_scene)) {
+        auto *polygonComponent = m_scene.Get<PolygonComponent>(ent);
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+        glBufferData(GL_ARRAY_BUFFER, polygonComponent->vertices.size() * sizeof(glm::vec3), polygonComponent->vertices.data(), GL_STATIC_DRAW);
+
+        auto transform = glm::mat4(1.0f);
+
+        transform = glm::rotate(transform, glm::radians(polygonComponent->rotation), glm::vec3(0.0, 0.0, 1.0));
+
+        GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]);
+
+        shader.setInt("u_objType", 2);
+
+        glBindVertexArray(m_VAO);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, polygonComponent->vertices.size());
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -85,12 +104,12 @@ void Renderer::draw(Shader &shader) {
 void Renderer::update(float deltaTime) {
     float damping = 0.5f;
     // Update Circles
-    for (EntityID entity :
+    for (EntityID ent :
             SceneView<PositionComponent, VelocityComponent, AccelerationComponent,
                     CircleComponent>(&m_scene)) {
-        auto positionComponent = m_scene.Get<PositionComponent>(entity);
-        auto velocityComponent = m_scene.Get<VelocityComponent>(entity);
-        auto accelerationComponent = m_scene.Get<AccelerationComponent>(entity);
+        auto positionComponent = m_scene.Get<PositionComponent>(ent);
+        auto velocityComponent = m_scene.Get<VelocityComponent>(ent);
+        auto accelerationComponent = m_scene.Get<AccelerationComponent>(ent);
 
         positionComponent->position =
                 positionComponent->position + velocityComponent->velocity * deltaTime;
@@ -98,11 +117,18 @@ void Renderer::update(float deltaTime) {
                 velocityComponent->velocity * std::pow(damping, deltaTime) +
                 accelerationComponent->acceleration * deltaTime;
     }
-    // Update AABB
-    for (EntityID entity :
-            SceneView<AABBComponent, MassComponent>(&m_scene)) {
-        auto aabbComponent = m_scene.Get<AABBComponent>(entity);
-        auto massComponent = m_scene.Get<MassComponent>(entity);
+
+    // Update polygons
+    for (EntityID ent : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent>(&m_scene)) {
+        auto *polygonComponent = m_scene.Get<PolygonComponent>(ent);
+        auto velocityComponent = m_scene.Get<VelocityComponent>(ent);
+        auto accelerationComponent = m_scene.Get<AccelerationComponent>(ent);
+
+        for (auto &v : polygonComponent->vertices) {
+            v = v + velocityComponent->velocity * deltaTime;
+        }
+
+        velocityComponent->velocity = velocityComponent->velocity * std::pow(damping, deltaTime) + accelerationComponent->acceleration * deltaTime;
     }
 
     // Check collision circle aabb
@@ -160,48 +186,6 @@ void Renderer::update(float deltaTime) {
     }
 }
 
-/*void Renderer::draw(Shader &shader) {
-    shader.use();
-
-    float vertices[] = {
-        1.0f, 1.0f, 0.0f,  // top right
-        1.0f, -1.0f, 0.0f,  // bottom right
-        -1.0f, -1.0f, 0.0f,  // bottom left
-        -1.0f, 1.0f, 0.0f,   // top left
-   };
-
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-
-    for (auto& object : *m_objects) {
-        if (auto polygon = dynamic_cast<Polygon*>(object)) {
-            glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-            glBufferData(GL_ARRAY_BUFFER, polygon->vertices.size() * sizeof(glm::vec3), polygon->vertices.data(), GL_STATIC_DRAW);
-
-            object->draw(shader);
-
-            glBindVertexArray(m_VAO);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, polygon->vertices.size());
-        } else {
-            glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-            object->draw(shader);
-
-            glBindVertexArray(m_VAO);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-        }
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}*/
-
 Renderer::~Renderer() {
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteBuffers(1, &m_VBO);
@@ -257,16 +241,25 @@ void Renderer::insertAABB(float minX, float minY, float maxX, float maxY) {
     massComponent->inverseMass = 1.0f;
 }
 
-void Renderer::insertPolygon(std::initializer_list<glm::vec3> il) {
-    auto polygon = new Polygon(il, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 0.5f, 1.0f, 0.005f);
-    m_objects->push_back(polygon);
-}
-
 void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
-    auto polygon = new Polygon(std::move(vertices), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -5.0f, 0.0f), 0.5f, 1.0f, 0.005f);
-    m_objects->push_back(polygon);
-}
+    EntityID polygon = m_scene.NewEntity();
+    auto *polygonComponent = m_scene.Assign<PolygonComponent>(polygon);
+    auto *avComponent = m_scene.Assign<AngularVelocityComponent>(polygon);
+    auto *aaComponent = m_scene.Assign<AngularAccelerationComponent>(polygon);
+    auto *accComponent = m_scene.Assign<AccelerationComponent>(polygon);
+    auto *velComponent = m_scene.Assign<VelocityComponent>(polygon);
+    auto *massComponent = m_scene.Assign<MassComponent>(polygon);
 
+    polygonComponent->vertices = vertices;
+    polygonComponent->rotation = 0;
+
+    velComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    accComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
+    massComponent->inverseMass = 1.0f;
+
+    avComponent->angularVelocity = 0.0f;
+    aaComponent->angularAcceleration = 0.0f;
+}
 
 std::vector<Object*>* Renderer::objects() const {
     return m_objects;

@@ -21,7 +21,8 @@ public:
   static bool checkCollisionPolygonPolygon(const Polygon &p1,
                                            const Polygon &p2);
   static bool checkCollisionPolygonAABB(const Polygon &p, const AABB &aabb);
-  static void resolveCollisionPolygonAABB(Manifold &m);
+  static void resolveCollisionPolygonAABB(Manifold &m, Polygon &polygon);
+
 };
 
 #endif
