@@ -106,7 +106,6 @@ void Renderer::update(float deltaTime) {
     }
 
     // Check collision circle aabb
-
     for (EntityID cEntity : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
         auto circleComp = m_scene.Get<CircleComponent>(cEntity);
         auto cPos = m_scene.Get<PositionComponent>(cEntity);
@@ -130,73 +129,35 @@ void Renderer::update(float deltaTime) {
             }
         }
     }
-/*
-    // Update all collisions
-    for (EntityID e1 : SceneView<>(&m_scene)) {
-        for (EntityID e2: SceneView<>(&m_scene)) {
-            auto circleComponent1 = m_scene.Get<CircleComponent>(e1);
-            auto aabbComponent1 = m_scene.Get<AABBComponent>(e1);
-            auto circleComponent2 = m_scene.Get<CircleComponent>(e2);
-            auto aabbComponent2 = m_scene.Get<AABBComponent>(e2);
 
-            if (circleComponent1 && circleComponent2) {
-                auto pos1 = m_scene.Get<PositionComponent>(e1);
-                auto vel1 = m_scene.Get<VelocityComponent>(e1);
-                auto acc1 = m_scene.Get<AccelerationComponent>(e1);
-                auto mass1 = m_scene.Get<MassComponent>(e1);
+    // Check for collision with circle circle
+    for (EntityID e1 : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
+        auto circleComp1 = m_scene.Get<CircleComponent>(e1);
+        auto cPos1 = m_scene.Get<PositionComponent>(e1);
+        auto cVel1 = m_scene.Get<VelocityComponent>(e1);
+        auto cAcc1 = m_scene.Get<AccelerationComponent>(e1);
+        auto cMass1 = m_scene.Get<MassComponent>(e1);
 
-                auto pos2 = m_scene.Get<PositionComponent>(e2);
-                auto vel2 = m_scene.Get<VelocityComponent>(e2);
-                auto acc2 = m_scene.Get<AccelerationComponent>(e2);
-                auto mass2 = m_scene.Get<MassComponent>(e2);
+        Circle circle1(cPos1, cVel1, cAcc1, cMass1, circleComp1);
 
-                Circle circle1(pos1, vel1, acc1, mass1, circleComponent1);
-                Circle circle2(pos2, vel2, acc2, mass2, circleComponent2);
-
-                if (PhysicsEngine::checkCollisionCircleCircle(circle1, circle2)) {
-                    PhysicsEngine::resolveCollisionCircleCircle(circle1, circle2);
-                }
+        for (EntityID e2 : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
+            // If we are testing the same circle we do nothing
+            if (e1 == e2) {
+                continue;
             }
-            if (circleComponent1 && aabbComponent2) {
-                auto pos1 = m_scene.Get<PositionComponent>(e1);
-                auto vel1 = m_scene.Get<VelocityComponent>(e1);
-                auto acc1 = m_scene.Get<AccelerationComponent>(e1);
-                auto mass1 = m_scene.Get<MassComponent>(e1);
+            auto circleComp2 = m_scene.Get<CircleComponent>(e2);
+            auto cPos2 = m_scene.Get<PositionComponent>(e2);
+            auto cVel2 = m_scene.Get<VelocityComponent>(e2);
+            auto cAcc2 = m_scene.Get<AccelerationComponent>(e2);
+            auto cMass2 = m_scene.Get<MassComponent>(e2);
 
-                auto aabb2 = m_scene.Get<AABBComponent>(e2);
-                auto mass2 = m_scene.Get<MassComponent>(e2);
-                Circle circle(pos1, vel1, acc1, mass1, circleComponent1);
-                AABB aabb(aabb2, mass2);
+            Circle circle2(cPos2, cVel2, cAcc2, cMass2, circleComp2);
 
-                if (PhysicsEngine::checkCollisionAABBCircle(aabb, circle)) {
-                    Manifold m{};
-                    m.AABBvsCircle(aabb, circle);
-                    PhysicsEngine::resolveCollisionAABBCircle(m, aabb, circle);
-
-                }
-            }
-            if (aabbComponent1 && circleComponent2) {
-
-                auto aabb1 = m_scene.Get<AABBComponent>(e1);
-                auto mass1 = m_scene.Get<MassComponent>(e1);
-
-                auto pos2 = m_scene.Get<PositionComponent>(e2);
-                auto vel2 = m_scene.Get<VelocityComponent>(e2);
-                auto acc2 = m_scene.Get<AccelerationComponent>(e2);
-                auto mass2 = m_scene.Get<MassComponent>(e2);
-
-                AABB aabb(aabb1, mass1);
-                Circle circle(pos2, vel2, acc2, mass2, circleComponent2);
-
-                if (PhysicsEngine::checkCollisionAABBCircle(aabb, circle)) {
-                    Manifold m{};
-                    m.AABBvsCircle(aabb, circle);
-                    PhysicsEngine::resolveCollisionAABBCircle(m, aabb, circle);
-                }
+            if (PhysicsEngine::checkCollisionCircleCircle(circle1, circle2)) {
+                PhysicsEngine::resolveCollisionCircleCircle(circle1, circle2);
             }
         }
-
-    }*/
+    }
 }
 
 /*void Renderer::draw(Shader &shader) {
