@@ -63,7 +63,7 @@ struct SceneView {
         }
 
         bool ValidIndex() {
-            return isEntityValid(pScene->entities[index].id) && (all || (mask & pScene->entities[index].mask).any());
+            return isEntityValid(pScene->entities[index].id) && (all || (mask & pScene->entities[index].mask) == mask);
         }
     };
 

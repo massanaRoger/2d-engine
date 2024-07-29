@@ -105,6 +105,32 @@ void Renderer::update(float deltaTime) {
         auto massComponent = m_scene.Get<MassComponent>(entity);
     }
 
+    // Check collision circle aabb
+
+    for (EntityID cEntity : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
+        auto circleComp = m_scene.Get<CircleComponent>(cEntity);
+        auto cPos = m_scene.Get<PositionComponent>(cEntity);
+        auto cVel = m_scene.Get<VelocityComponent>(cEntity);
+        auto cAcc = m_scene.Get<AccelerationComponent>(cEntity);
+        auto cMass = m_scene.Get<MassComponent>(cEntity);
+
+        Circle circle(cPos, cVel, cAcc, cMass, circleComp);
+
+        for (EntityID aabbEntity : SceneView<AABBComponent, MassComponent>(&m_scene)) {
+
+            auto aabbComp = m_scene.Get<AABBComponent>(aabbEntity);
+            auto aabbMass = m_scene.Get<MassComponent>(aabbEntity);
+
+            AABB aabb(aabbComp, aabbMass);
+
+            if (PhysicsEngine::checkCollisionAABBCircle(aabb, circle)) {
+                Manifold m{};
+                m.AABBvsCircle(aabb, circle);
+                PhysicsEngine::resolveCollisionAABBCircle(m, aabb, circle);
+            }
+        }
+    }
+/*
     // Update all collisions
     for (EntityID e1 : SceneView<>(&m_scene)) {
         for (EntityID e2: SceneView<>(&m_scene)) {
@@ -170,7 +196,7 @@ void Renderer::update(float deltaTime) {
             }
         }
 
-    }
+    }*/
 }
 
 /*void Renderer::draw(Shader &shader) {
