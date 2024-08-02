@@ -199,8 +199,9 @@ void Renderer::update(float deltaTime) {
             auto pMass = m_scene.Get<MassComponent>(pEntity);
             auto pAngVel = m_scene.Get<AngularVelocityComponent>(pEntity);
             auto pAngAcc = m_scene.Get<AngularAccelerationComponent>(pEntity);
+            auto pInertia = m_scene.Get<InertiaComponent>(pEntity);
 
-            Polygon polygon(pVel, pAcc, pMass, polygonComp, pAngVel, pAngAcc);
+            Polygon polygon(pVel, pAcc, pMass, polygonComp, pAngVel, pAngAcc, pInertia);
 
             if (PhysicsEngine::checkCollisionPolygonAABB(polygon, aabb)) {
                 Manifold m{};
@@ -303,6 +304,7 @@ void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
     auto *accComponent = m_scene.Assign<AccelerationComponent>(polygon);
     auto *velComponent = m_scene.Assign<VelocityComponent>(polygon);
     auto *massComponent = m_scene.Assign<MassComponent>(polygon);
+    auto *inertiaComponent = m_scene.Assign<InertiaComponent>(polygon);
 
     polygonComponent->vertices = vertices;
     polygonComponent->rotation = 0;
@@ -310,6 +312,7 @@ void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
     velComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     accComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
     massComponent->inverseMass = 1.0f;
+    inertiaComponent->intertia = Polygon::calculateRotationalInertia(vertices, massComponent->inverseMass);
 
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;

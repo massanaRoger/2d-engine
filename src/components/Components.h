@@ -41,3 +41,7 @@ struct AngularVelocityComponent {
 struct AngularAccelerationComponent {
     float angularAcceleration;
 };
+
+struct InertiaComponent {
+    float intertia;
+};
