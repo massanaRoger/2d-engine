@@ -59,7 +59,7 @@ int main() {
                          getFullPath("shaders/fragment_shader.glsl"));
 
   renderer = std::make_unique<Renderer>();
-  renderer->insertAABB(-0.9, -0.9, 0.9, -0.8);
+  renderer->insertStaticBox(-0.9, -0.9, 0.9, -0.8);
 
   glViewport(0, 0, 800, 800);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -147,7 +147,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     double ndcX, ndcY;
     pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
     float r = 0.05f;
-    renderer->insertAABB(ndcX - r, ndcY - r, ndcX + r, ndcY + r);
+    renderer->insertBox(ndcX - r, ndcY - r, ndcX + r, ndcY + r);
   }
 }
 

@@ -52,6 +52,9 @@ add_executable(${PROJECT_NAME}
         src/SceneView.cpp
         src/components/Components.cpp
         src/component.cpp
+        src/Box.cpp
+        src/physics/contacts.cpp
+        src/physics/contacts.h
 )
 
 # Define the current working directory as a macro

@@ -13,6 +13,7 @@
 #include "Object.h"
 #include "Scene.h"
 #include "SceneView.h"
+#include "utils.h"
 #include "components/Components.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
@@ -57,7 +58,7 @@ void Renderer::draw(Shader &shader) {
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     }
 
-    for (EntityID ent : SceneView<AABBComponent>(&m_scene)) {
+    for (EntityID ent : SceneView<BoxComponent>(&m_scene)) {
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
@@ -68,10 +69,10 @@ void Renderer::draw(Shader &shader) {
         GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]);
 
-        auto *aabbComponent = m_scene.Get<AABBComponent>(ent);
+        auto *boxComponent = m_scene.Get<BoxComponent>(ent);
 
-        shader.setVec2("u_min", aabbComponent->min.x, aabbComponent->min.y);
-        shader.setVec2("u_max", aabbComponent->max.x, aabbComponent->max.y);
+        shader.setVec2("u_min", boxComponent->min.x, boxComponent->min.y);
+        shader.setVec2("u_max", boxComponent->max.x, boxComponent->max.y);
         shader.setInt("u_objType", 0);
 
         glBindVertexArray(m_VAO);
@@ -119,7 +120,7 @@ void Renderer::update(float deltaTime) {
     }
 
     // Update polygons
-    for (EntityID ent : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent>(&m_scene)) {
+    /*for (EntityID ent : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent>(&m_scene)) {
         auto *polygonComponent = m_scene.Get<PolygonComponent>(ent);
         auto velocityComponent = m_scene.Get<VelocityComponent>(ent);
         auto accelerationComponent = m_scene.Get<AccelerationComponent>(ent);
@@ -129,9 +130,27 @@ void Renderer::update(float deltaTime) {
         }
 
         velocityComponent->velocity = velocityComponent->velocity * std::pow(damping, deltaTime) + accelerationComponent->acceleration * deltaTime;
+    }*/
+
+    for (EntityID ent : SceneView<BoxComponent, VelocityComponent, AccelerationComponent>(&m_scene)) {
+        auto boxComponent = m_scene.Get<BoxComponent>(ent);
+        auto centerOfMassComponent = m_scene.Get<CenterOfMassComponent>(ent);
+
+        auto velocityComponent = m_scene.Get<VelocityComponent>(ent);
+        auto accelerationComponent = m_scene.Get<AccelerationComponent>(ent);
+
+        boxComponent->min =
+                boxComponent->min + velocityComponent->velocity * deltaTime;
+        boxComponent->max =
+           boxComponent->max + velocityComponent->velocity * deltaTime;
+        centerOfMassComponent->centerOfMass = (boxComponent->max - boxComponent->min) / 2.0f;
+
+        velocityComponent->velocity =
+                velocityComponent->velocity * std::pow(damping, deltaTime) +
+                accelerationComponent->acceleration * deltaTime;
     }
 
-    // Check collision circle aabb
+    // Check collision circle box
     for (EntityID cEntity : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
         auto circleComp = m_scene.Get<CircleComponent>(cEntity);
         auto cPos = m_scene.Get<PositionComponent>(cEntity);
@@ -141,18 +160,19 @@ void Renderer::update(float deltaTime) {
 
         Circle circle(cPos, cVel, cAcc, cMass, circleComp);
 
-        for (EntityID aabbEntity : SceneView<AABBComponent, MassComponent>(&m_scene)) {
+        for (EntityID aabbEntity : SceneView<BoxComponent, MassComponent, CenterOfMassComponent>(&m_scene)) {
 
-            auto aabbComp = m_scene.Get<AABBComponent>(aabbEntity);
+            auto aabbComp = m_scene.Get<BoxComponent>(aabbEntity);
             auto aabbMass = m_scene.Get<MassComponent>(aabbEntity);
+            auto aabbCenter = m_scene.Get<CenterOfMassComponent>(aabbEntity);
 
             AABB aabb(aabbComp, aabbMass);
 
-            if (PhysicsEngine::checkCollisionAABBCircle(aabb, circle)) {
-                Manifold m{};
-                m.AABBvsCircle(aabb, circle);
+            Manifold m{};
+            if (m.CirclevsBox(cPos->position, circleComp->radius, calculateAABBvertices(aabbComp->min, aabbComp->max), aabbCenter->centerOfMass)) {
                 PhysicsEngine::resolveCollisionAABBCircle(m, aabb, circle);
             }
+
         }
     }
 
@@ -186,8 +206,8 @@ void Renderer::update(float deltaTime) {
     }
 
     // Check collision aabb polygon
-    for (EntityID aabbEntity : SceneView<AABBComponent, MassComponent>(&m_scene)) {
-        auto aabbComp = m_scene.Get<AABBComponent>(aabbEntity);
+    for (EntityID aabbEntity : SceneView<BoxComponent, MassComponent>(&m_scene)) {
+        auto aabbComp = m_scene.Get<BoxComponent>(aabbEntity);
         auto aabbMass = m_scene.Get<MassComponent>(aabbEntity);
 
         AABB aabb(aabbComp, aabbMass);
@@ -286,15 +306,56 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
     circleComponent->radius = radius;
 }
 
-
+#if false
 void Renderer::insertAABB(float minX, float minY, float maxX, float maxY) {
     EntityID aabb = m_scene.NewEntity();
-    auto *aabbComponent = m_scene.Assign<AABBComponent>(aabb);
+    auto *boxComponent = m_scene.Assign<BoxComponent>(aabb);
     auto *massComponent = m_scene.Assign<MassComponent>(aabb);
-    aabbComponent->min = glm::vec3(minX, minY, 0.0f);
-    aabbComponent->max = glm::vec3(maxX, maxY, 0.0f);
+    boxComponent->min = glm::vec3(minX, minY, 0.0f);
+    boxComponent->max = glm::vec3(maxX, maxY, 0.0f);
     massComponent->inverseMass = 1.0f;
 }
+#endif
+
+void Renderer::insertStaticBox(float minX, float minY, float maxX, float maxY) {
+    EntityID box = m_scene.NewEntity();
+    auto *boxComponent = m_scene.Assign<BoxComponent>(box);
+    auto *massComponent = m_scene.Assign<MassComponent>(box);
+    auto *centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(box);
+
+    boxComponent->min = glm::vec3(minX, minY, 0.0f);
+    boxComponent->max = glm::vec3(maxX, maxY, 0.0f);
+    centerOfMassComponent->centerOfMass = (boxComponent->max - boxComponent->min) / 2.0f;
+    massComponent->inverseMass = std::numeric_limits<float>::max();
+}
+
+void Renderer::insertBox(float minX, float minY, float maxX, float maxY) {
+    EntityID box = m_scene.NewEntity();
+    auto *boxComponent = m_scene.Assign<BoxComponent>(box);
+    auto *massComponent = m_scene.Assign<MassComponent>(box);
+    auto *centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(box);
+    auto *velocityComponent = m_scene.Assign<VelocityComponent>(box);
+    auto *accelerationComponent = m_scene.Assign<AccelerationComponent>(box);
+    auto *avComponent = m_scene.Assign<AngularVelocityComponent>(box);
+    auto *aaComponent = m_scene.Assign<AngularAccelerationComponent>(box);
+    auto *inertiaComponent = m_scene.Assign<InertiaComponent>(box);
+    auto *orientationComponent = m_scene.Assign<OrientationComponent>(box);
+
+    boxComponent->min = glm::vec3(minX, minY, 0.0f);
+    boxComponent->max = glm::vec3(maxX, maxY, 0.0f);
+    massComponent->inverseMass = 1.0f;
+    centerOfMassComponent->centerOfMass = (boxComponent->max - boxComponent->min) / 2.0f;
+
+    velocityComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    accelerationComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
+
+    avComponent->angularVelocity = 0.0f;
+    aaComponent->angularAcceleration = 0.0f;
+
+    inertiaComponent->inertia = PhysicsEngine::calculateMomentOfInertia(boxComponent->min, boxComponent->max, 1.0f / massComponent->inverseMass);
+    orientationComponent->orientation = 0.0f;
+}
+
 
 void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
     EntityID polygon = m_scene.NewEntity();
@@ -312,7 +373,7 @@ void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
     velComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     accComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
     massComponent->inverseMass = 1.0f;
-    inertiaComponent->intertia = Polygon::calculateRotationalInertia(vertices, massComponent->inverseMass);
+    inertiaComponent->inertia = Polygon::calculateRotationalInertia(vertices, massComponent->inverseMass);
 
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;

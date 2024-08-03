@@ -1,7 +1,3 @@
-//
-// Created by Roger2 on 27/06/2024.
-//
-
 #include "PhysicsEngine.h"
 
 #include "../Polygon.h"
@@ -175,4 +171,39 @@ bool PhysicsEngine::checkCollisionPolygonAABB(const Polygon &p,
   return true;
 }
 
-static void positionalCorrection(Circle &circle1, Circle &circle2) {}
+
+bool PhysicsEngine::checkCollisionBoxBox(const Box &box1, const Box &box2) {
+  std::vector<glm::vec3> vertices1 = calculateAABBvertices(*(box1.min), *(box1.max));
+  std::vector<glm::vec3> normals1 = calculateNormals(vertices1);
+
+  std::vector<glm::vec3> vertices2 =
+      calculateAABBvertices(*(box2.min), *(box2.max));
+  std::vector<glm::vec3> normals2 = calculateNormals(vertices2);
+
+  for (auto &normal : normals1) {
+    if (!overlapOnAxis(vertices1, vertices2, normal)) {
+      return false;
+    }
+  }
+
+  for (auto &normal : normals2) {
+    if (!overlapOnAxis(vertices1, vertices2, normal)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void PhysicsEngine::resolveCollisionBoxBox(const Box &box1, const Box &box2) {
+
+}
+
+float PhysicsEngine::calculateMomentOfInertia(const glm::vec3 &min, const glm::vec3 &max, float mass) {
+  float width = max.x - min.x;
+  float height = max.y - min.y;
+
+  float momentOfInertia = (mass / 12.0f) * (width * width + height * height);
+
+  return momentOfInertia;
+}
+

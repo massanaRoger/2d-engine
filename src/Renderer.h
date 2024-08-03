@@ -13,6 +13,8 @@ public:
 
     void insertCircle(float centerX, float centerY, float radius);
     void insertAABB(float minX, float minY, float maxX, float maxY);
+    void insertBox(float minX, float minY, float maxX, float maxY);
+    void insertStaticBox(float minX, float minY, float maxX, float maxY);
     void insertPolygon(std::initializer_list<glm::vec3> il);
     void insertPolygon(std::vector<glm::vec3>&& vertices);
     void update(float deltaTime);

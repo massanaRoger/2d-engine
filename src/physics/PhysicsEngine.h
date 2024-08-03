@@ -8,6 +8,7 @@
 #include "../Polygon.h"
 #include "../Scene.h"
 #include "Manifold.h"
+#include "../Box.h"
 
 class PhysicsEngine {
 public:
@@ -22,6 +23,12 @@ public:
                                            const Polygon &p2);
   static bool checkCollisionPolygonAABB(const Polygon &p, const AABB &aabb);
   static void resolveCollisionPolygonAABB(Manifold &m, Polygon &polygon);
+
+  static float calculateMomentOfInertia(const glm::vec3 &min, const glm::vec3 &max, float mass);
+  static bool checkCollisionBoxBox(const Box &box1, const Box &box2);
+  static void resolveCollisionBoxBox(const Box &box1, const Box &box2);
+
+  static bool checkCollisionCircleBox(const glm::vec3 &circleCenter, float circleRadius,const std::vector<glm::vec3> &boxVertices);
 
 };
 

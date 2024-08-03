@@ -1,5 +1,5 @@
 #include "AABB.h"
 
 
-AABB::AABB(AABBComponent* aabbc, MassComponent* mass): aabbc(aabbc), mc(mass) {}
+AABB::AABB(BoxComponent* aabbc, MassComponent* mass): aabbc(aabbc), mc(mass) {}
 

@@ -24,9 +24,13 @@ struct CircleComponent {
     float radius{0.0f};
 };
 
-struct AABBComponent {
+struct BoxComponent {
     glm::vec3 min{0.0f};
     glm::vec3 max{0.0f};
+};
+
+struct CenterOfMassComponent {
+    glm::vec3 centerOfMass{0.0f};
 };
 
 struct PolygonComponent {
@@ -43,5 +47,9 @@ struct AngularAccelerationComponent {
 };
 
 struct InertiaComponent {
-    float intertia;
+    float inertia;
+};
+
+struct OrientationComponent {
+    float orientation;
 };

@@ -8,12 +8,13 @@
 #include <limits>
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include "contacts.h"
 #include "glm/gtx/norm.hpp"
 
 bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
 
     // Get the vertices of the AABB
-    std::vector<glm::vec3> aabbVertices = {
+    std::vector aabbVertices = {
         glm::vec3(aabb.aabbc->min.x, aabb.aabbc->min.y, 0.0f),
         glm::vec3(aabb.aabbc->max.x, aabb.aabbc->min.y, 0.0f),
         glm::vec3(aabb.aabbc->max.x, aabb.aabbc->max.y, 0.0f),
@@ -132,3 +133,67 @@ bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
         }
     return true;
 }
+
+bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, const std::vector<glm::vec3> &boxVertices, const glm::vec3 &boxCenter) {
+    normal = glm::vec3{};
+    penetration = std::numeric_limits<float>::max();
+    float minA, maxA;
+    float minB, maxB;
+
+    for (int i = 0; i < boxVertices.size(); i++) {
+        glm::vec3 va = boxVertices[i];
+        glm::vec3 vb = boxVertices[(i + 1) % boxVertices.size()];
+
+        glm::vec3 edge = vb - va;
+        glm::vec3 axis = glm::vec3(-edge.y, edge.x, 0.0f);
+
+
+        projectPolygon(boxVertices, axis, minA, maxA);
+        projectCircle(circleCenter, circleRadius, axis, minB, maxB);
+
+        if (minA >= maxB || minB >= maxA) {
+            return false;
+        }
+
+        float axisDepth = std::min(maxB - minA, maxA - minB);
+
+        if (axisDepth < penetration) {
+            penetration = axisDepth;
+            normal = axis;
+        }
+    }
+
+    int cpIndex = findClosestPointOnPolygon(circleCenter, boxVertices);
+    glm::vec3 cp = boxVertices[cpIndex];
+
+    glm::vec3 axis = cp - circleCenter;
+
+    projectPolygon(boxVertices, axis, minA, maxA);
+    projectCircle(circleCenter, circleRadius, axis, minB, maxB);
+
+    if (minA >= maxB || minB >= maxA) {
+        return false;
+    }
+
+    float axisDepth = std::min(maxB - minA, maxA - minB);
+
+    if (axisDepth < penetration) {
+        penetration = axisDepth;
+        normal = axis;
+    }
+
+    penetration /= glm::length(normal);
+    normal = glm::normalize(normal);
+
+    glm::vec3 direction = boxCenter - circleCenter;
+
+    if (glm::dot(direction, normal) < 0.0f) {
+        normal = -normal;
+    }
+
+    contactPoint1 = contactPointCirclevsBox(circleCenter, boxVertices);
+    nContacts = 1;
+
+    return true;
+}
+

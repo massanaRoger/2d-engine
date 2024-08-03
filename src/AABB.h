@@ -5,10 +5,10 @@
 #include "components/Components.h"
 
 struct AABB {
-    AABBComponent* aabbc;
+    BoxComponent* aabbc;
     MassComponent* mc;
 
-    AABB(AABBComponent* aabbc, MassComponent* mass);
+    AABB(BoxComponent* aabbc, MassComponent* mass);
 };
 
 
