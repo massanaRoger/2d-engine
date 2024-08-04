@@ -46,35 +46,6 @@ bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
 }
 #endif
 
-bool Manifold::CirclevsCircle(Circle &circle1, Circle &circle2) {
-    // Vector from A to B
-    glm::vec3 n = circle2.pc->position - circle1.pc->position;
-    float r = circle1.cc->radius + circle2.cc->radius;
-    r *= r;
-    if(glm::length2(n) > r)
-        return false;
-    // Circles have collided, now compute manifold
-    float d = glm::length(n); // perform actual sqrt
-    // If distance between circles is not zero
-    if(d != 0)
-    {
-        // Distance is difference between radius and distance
-        penetration = r - d;
-        // Utilize our d since we performed sqrt on it already within Length( )
-        // Points from A to B, and is a unit vector
-        normal = n / d;
-        return true;
-    }
-        // Circles are on same position
-    else
-    {
-        // Choose random (but consistent) values
-        penetration = circle1.cc->radius;
-        normal = glm::vec3(1.0f, 0.0f, 0.0f);
-        return true;
-    }
-}
-
 #if false
 bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
     glm::vec3 aabbCenter = glm::vec3((aabb.aabbc->min + aabb.aabbc->max) / 2.0f);
@@ -138,6 +109,22 @@ bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
 }
 #endif
 
+bool Manifold::CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB, float radiusB) {
+    glm::vec3 ab = centerB - centerA;
+    float r = radiusA + radiusB;
+
+    r *= r;
+    if (glm::length2(ab) > r) return false;
+
+    float d = glm::length(ab);
+    penetration = r - d;
+    normal = ab / d;
+
+    glm::vec3 contactPoint1 = contactPointCircleCircle(centerA, radiusA, centerB);
+    nContacts = 1;
+    return true;
+}
+
 bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, const std::vector<glm::vec3> &boxVertices, const glm::vec3 &boxCenter) {
     normal = glm::vec3{};
     penetration = std::numeric_limits<float>::max();
@@ -191,7 +178,7 @@ bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, co
 
     glm::vec3 direction = boxCenter - circleCenter;
 
-    if (glm::dot(direction, normal) < 0.0f) {
+    if (glm::dot(direction, normal) > 0.0f) {
         normal = -normal;
     }
 

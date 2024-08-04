@@ -169,30 +169,31 @@ void Renderer::update(float deltaTime) {
     }
 
     // Check for collision with circle circle
-    for (EntityID e1 : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
+    for (EntityID e1 : SceneView<CenterOfMassComponent, VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
         auto circleComp1 = m_scene.Get<CircleComponent>(e1);
-        auto cPos1 = m_scene.Get<PositionComponent>(e1);
+        auto cPos1 = m_scene.Get<CenterOfMassComponent>(e1);
         auto cVel1 = m_scene.Get<VelocityComponent>(e1);
-        auto cAcc1 = m_scene.Get<AccelerationComponent>(e1);
         auto cMass1 = m_scene.Get<MassComponent>(e1);
+        auto cAng1 = m_scene.Get<AngularVelocityComponent>(e1);
+        auto cInertia1 = m_scene.Get<InertiaComponent>(e1);
 
-        Circle circle1(cPos1, cVel1, cAcc1, cMass1, circleComp1);
-
-        for (EntityID e2 : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
+        for (EntityID e2 : SceneView<CenterOfMassComponent, VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
             // If we are testing the same circle we do nothing
             if (e1 == e2) {
                 continue;
             }
             auto circleComp2 = m_scene.Get<CircleComponent>(e2);
-            auto cPos2 = m_scene.Get<PositionComponent>(e2);
+            auto cPos2 = m_scene.Get<CenterOfMassComponent>(e2);
             auto cVel2 = m_scene.Get<VelocityComponent>(e2);
-            auto cAcc2 = m_scene.Get<AccelerationComponent>(e2);
             auto cMass2 = m_scene.Get<MassComponent>(e2);
+            auto cAng2 = m_scene.Get<AngularVelocityComponent>(e2);
+            auto cInertia2 = m_scene.Get<InertiaComponent>(e2);
 
-            Circle circle2(cPos2, cVel2, cAcc2, cMass2, circleComp2);
+            Manifold m{};
 
-            if (PhysicsEngine::checkCollisionCircleCircle(circle1, circle2)) {
-                PhysicsEngine::resolveCollisionCircleCircle(circle1, circle2);
+            if (m.CirclevsCircle(cPos1->centerOfMass, circleComp1->radius, cPos2->centerOfMass, circleComp2->radius)) {
+                PhysicsEngine::resolveCollisionBoxCircle(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
+                    cMass1->inverseMass, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity, cMass2->inverseMass, cInertia2->invInertia);
             }
         }
     }

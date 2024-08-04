@@ -102,7 +102,7 @@ void PhysicsEngine::resolveCollisionBoxCircle(const Manifold &m, const glm::vec3
   glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float &circleAngularVelocity, float circleInverseMass, float circleInverseInertia) {
 
   // Todo: calculate minimum restitution between the box and circle, for the moment we assume perfect elasticity
-  float e = 1.0f;
+  float e = 0.7f;
 
   std::vector<glm::vec3> contactList{};
   assert(m.nContacts == 1 || m.nContacts == 2);
@@ -133,7 +133,7 @@ void PhysicsEngine::resolveCollisionBoxCircle(const Manifold &m, const glm::vec3
 
     float contactVelocityMagnitude = glm::dot(relativeVelocity, m.normal);
 
-    if (contactVelocityMagnitude < 0.0f) {
+    if (contactVelocityMagnitude > 0.0f) {
       ignoreContact[i] = true;
       continue;
     }

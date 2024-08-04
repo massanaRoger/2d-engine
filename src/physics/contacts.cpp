@@ -48,6 +48,14 @@ glm::vec3 contactPointCirclevsBox(const glm::vec3 &circleCenter, const std::vect
     return contactPoint;
 }
 
+glm::vec3 contactPointCircleCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB) {
+    glm::vec3 contactPoint{};
+    glm::vec3 ab = centerB - centerA;
+    glm::vec3 dir = glm::normalize(ab);
+    contactPoint = centerA + dir * radiusA;
+    return contactPoint;
+}
+
 int findClosestPointOnPolygon(const glm::vec3 &circleCenter, const std::vector<glm::vec3> &vertices) {
     int result = -1;
     float minDistance = std::numeric_limits<float>::max();

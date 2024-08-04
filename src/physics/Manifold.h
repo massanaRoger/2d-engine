@@ -15,6 +15,7 @@ struct Manifold {
     int nContacts;
 
     bool CirclevsCircle(Circle &circle1, Circle &circle2);
+    bool CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB, float radiusB);
     bool AABBvsCircle(AABB &aabb, Circle &circle);
     bool PolygonvsAABB(Polygon &polygon, AABB &aabb);
     bool BoxvsBox(Box &box1, Box &box2);
