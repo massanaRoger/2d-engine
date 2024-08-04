@@ -80,3 +80,17 @@ std::vector<glm::vec3> calculateAABBvertices(const glm::vec3 &min, const glm::ve
 
     return vertices;
 }
+
+std::vector<glm::vec3> createBoxVertices(float width, float height) {
+    float halfWidth = width / 2.0f;
+    float halfHeight = height / 2.0f;
+
+    std::vector<glm::vec3> vertices = {
+        glm::vec3(-halfWidth, -halfHeight, 0.0f), // Bottom-left
+        glm::vec3(halfWidth, -halfHeight, 0.0f),  // Bottom-right
+        glm::vec3(halfWidth, halfHeight, 0.0f),   // Top-right
+        glm::vec3(-halfWidth, halfHeight, 0.0f)   // Top-left
+    };
+
+    return vertices;
+}

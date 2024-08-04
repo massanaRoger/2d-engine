@@ -16,5 +16,6 @@ void projectCircle(const glm::vec3 &center, float radius, glm::vec3 &axis, float
 bool overlapOnAxis(const std::vector<glm::vec3>& vertices1, const std::vector<glm::vec3>& vertices2, const glm::vec3& axis);
 
 std::vector<glm::vec3> calculateAABBvertices(const glm::vec3 &min, const glm::vec3 &max);
+std::vector<glm::vec3> createBoxVertices(float width, float height);
 
 #endif

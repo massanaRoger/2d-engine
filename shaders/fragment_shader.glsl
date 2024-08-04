@@ -35,6 +35,6 @@ void main()
         FragColor.rgb = vec3(1.0);
         FragColor.a = distance;
     } else if (u_objType == 2) {
-        FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        FragColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
 }
