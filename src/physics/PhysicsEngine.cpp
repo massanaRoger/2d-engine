@@ -7,6 +7,8 @@
 #include "../utils.h"
 #include <cmath>
 
+#include "Transformations.h"
+
 void PhysicsEngine::resolveCollisionPolygonAABB(Manifold &m, Polygon &polygon) {
 
   glm::vec3 collisionNormal = m.normal;
@@ -95,41 +97,73 @@ bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb,
 }
 #endif
 
-void PhysicsEngine::resolveCollisionAABBCircle(const std::vector<glm::vec3> &boxVertices, glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float circleInverseMass, float circleRadius) {
-  glm::vec3 closestPoint;
+void PhysicsEngine::resolveCollisionBoxCircle(const Manifold &m, const glm::vec3 &boxCenter,
+  glm::vec3 &boxLinearVelocity, float &boxAngularVelocity, float boxInvInertia, float boxInvMass,
+  glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float &circleAngularVelocity, float circleInverseMass, float circleInverseInertia) {
 
-  glm::vec3 min = boxVertices[0];
-  glm::vec3 max = boxVertices[2];
-  closestPoint.x =
-      std::max(min.x, std::min(circleCenter.x, max.x));
-  closestPoint.y =
-      std::max(min.y, std::min(circleCenter.y, max.y));
-  closestPoint.z = 0;
-
-  glm::vec3 collisionNormal = circleCenter - closestPoint;
-  collisionNormal = glm::normalize(collisionNormal);
-
-  glm::vec3 relativeVelocity = circleVelocity;
-
-  float velocityAlongNormal = glm::dot(relativeVelocity, collisionNormal);
-  if (velocityAlongNormal > 0) {
-    return;
-  }
-
-  // Calculate restitution
+  // Todo: calculate minimum restitution between the box and circle, for the moment we assume perfect elasticity
   float e = 1.0f;
-  float j = -(1 + e) * velocityAlongNormal;
-  j /= circleInverseMass;
 
-  glm::vec3 impulse = collisionNormal * j;
-  circleVelocity = circleVelocity + impulse * circleInverseMass;
-
-  // Ensure the circle is pushed out of the AABB
-  float penetrationDepth =
-      circleRadius - glm::length(circleCenter - closestPoint);
-  if (penetrationDepth > 0) {
-    circleCenter += collisionNormal * penetrationDepth;
+  std::vector<glm::vec3> contactList{};
+  assert(m.nContacts == 1 || m.nContacts == 2);
+  contactList.push_back(m.contactPoint1);
+  if (m.nContacts == 2) {
+    contactList.push_back(m.contactPoint2);
   }
+
+  glm::vec3 impulseList[2];
+  glm::vec3 raList[2];
+  glm::vec3 rbList[2];
+  bool ignoreContact[2] = {false, false};
+
+  for (int i = 0; i < m.nContacts; i++) {
+    glm::vec3 ra = contactList[i] - boxCenter;
+    glm::vec3 rb = contactList[i] - circleCenter;
+
+    raList[i] = ra;
+    rbList[i] = rb;
+
+    glm::vec3 raPerp(ra.y, -ra.x, 0.0f);
+    glm::vec3 rbPerp(rb.y, -rb.x, 0.0f);
+
+    glm::vec3 angularLinearVelocityA = raPerp * boxAngularVelocity;
+    glm::vec3 angularLinearVelocityB = rbPerp * circleAngularVelocity;
+
+    glm::vec3 relativeVelocity = (circleVelocity + angularLinearVelocityB) - (boxLinearVelocity + angularLinearVelocityA);
+
+    float contactVelocityMagnitude = glm::dot(relativeVelocity, m.normal);
+
+    if (contactVelocityMagnitude < 0.0f) {
+      ignoreContact[i] = true;
+      continue;
+    }
+
+    float raPerpDotN = glm::dot(raPerp, m.normal);
+    float rbPerpDotN = glm::dot(rbPerp, m.normal);
+
+    float denom = boxInvMass + circleInverseMass +
+      (raPerpDotN * raPerpDotN) * boxInvInertia +
+      (rbPerpDotN * rbPerpDotN) * circleInverseInertia;
+
+    float j = -(1.0f + e) * contactVelocityMagnitude;
+    j /= denom;
+
+    j /= static_cast<float>(m.nContacts);
+
+    glm::vec3 impulse = j * m.normal;
+    impulseList[i] = impulse;
+  }
+
+  for (int i = 0; i < m.nContacts; i++) {
+    if (ignoreContact[i]) continue;
+    glm::vec3 impulse = impulseList[i];
+
+    boxLinearVelocity += -impulse * boxInvMass;
+    boxAngularVelocity += -Transformations::cross(glm::vec2(raList[i].x, raList[i].y), glm::vec2(impulse.x, impulse.y)) * boxInvInertia;
+    circleVelocity += impulse * circleInverseMass;
+    circleAngularVelocity += Transformations::cross(glm::vec2(rbList[i].x, rbList[i].y), glm::vec2(impulse.x, impulse.y)) * circleInverseInertia;
+  }
+
 }
 
 bool PhysicsEngine::checkCollisionPolygonPolygon(const Polygon &p1,

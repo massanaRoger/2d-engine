@@ -46,7 +46,7 @@ struct AngularAccelerationComponent {
 };
 
 struct InertiaComponent {
-    float inertia;
+    float invInertia;
 };
 
 struct OrientationComponent {
@@ -56,3 +56,5 @@ struct OrientationComponent {
 struct TransformComponent {
     glm::mat4 transformMatrix;
 };
+
+struct MovingComponent {};

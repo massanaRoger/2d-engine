@@ -11,13 +11,15 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include "Object.h"
 #include "Scene.h"
 #include "SceneView.h"
 #include "utils.h"
 #include "components/Components.h"
-#include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "shader/Shader.h"
 #include "physics/PhysicsEngine.h"
 #include "physics/Transformations.h"
@@ -37,22 +39,20 @@ void Renderer::draw(Shader &shader) {
         1, 2, 3    // second triangle
     };
 
-    for (EntityID ent : SceneView<PositionComponent, CircleComponent>(&m_scene)) {
+    for (EntityID ent : SceneView<CenterOfMassComponent, CircleComponent, TransformComponent>(&m_scene)) {
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        auto* positionComponent = m_scene.Get<PositionComponent>(ent);
-        auto* circleComponent = m_scene.Get<CircleComponent>(ent);
-
-        auto transformMatrix = glm::mat4(1.0f);
-        transformMatrix = glm::translate(transformMatrix, positionComponent->position);
+        auto centerOfMassComponent = m_scene.Get<CenterOfMassComponent>(ent);
+        auto circleComponent = m_scene.Get<CircleComponent>(ent);
+        auto transformComponent = m_scene.Get<TransformComponent>(ent);
 
         GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transformMatrix[0][0]);
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformComponent->transformMatrix));
 
-        shader.setVec2("u_center", positionComponent->position.x, positionComponent->position.y);
+        shader.setVec2("u_center", centerOfMassComponent->centerOfMass.x, centerOfMassComponent->centerOfMass.y);
         shader.setFloat("u_radius", circleComponent->radius);
         shader.setInt("u_objType", 1);
 
@@ -68,7 +68,7 @@ void Renderer::draw(Shader &shader) {
         glBufferData(GL_ARRAY_BUFFER, boxComponent->vertices.size() * sizeof(glm::vec3), boxComponent->vertices.data(), GL_STATIC_DRAW);
 
         GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transformComponent->transformMatrix[0][0]);
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformComponent->transformMatrix));
 
         shader.setInt("u_objType", 2);
 
@@ -101,20 +101,6 @@ void Renderer::draw(Shader &shader) {
 
 void Renderer::update(float deltaTime) {
     float damping = 0.5f;
-    // Update Circles
-    for (EntityID ent :
-            SceneView<PositionComponent, VelocityComponent, AccelerationComponent,
-                    CircleComponent>(&m_scene)) {
-        auto positionComponent = m_scene.Get<PositionComponent>(ent);
-        auto velocityComponent = m_scene.Get<VelocityComponent>(ent);
-        auto accelerationComponent = m_scene.Get<AccelerationComponent>(ent);
-
-        positionComponent->position =
-                positionComponent->position + velocityComponent->velocity * deltaTime;
-        velocityComponent->velocity =
-                velocityComponent->velocity * std::pow(damping, deltaTime) +
-                accelerationComponent->acceleration * deltaTime;
-    }
 
     // Update polygons
     /*for (EntityID ent : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent>(&m_scene)) {
@@ -129,15 +115,16 @@ void Renderer::update(float deltaTime) {
         velocityComponent->velocity = velocityComponent->velocity * std::pow(damping, deltaTime) + accelerationComponent->acceleration * deltaTime;
     }*/
 
-    for (EntityID ent : SceneView<BoxComponent, VelocityComponent, AccelerationComponent, CenterOfMassComponent,
-        AngularAccelerationComponent, AngularAccelerationComponent, InertiaComponent, OrientationComponent, TransformComponent>(&m_scene)) {
+    for (EntityID ent : SceneView<VelocityComponent, AccelerationComponent, CenterOfMassComponent,
+        AngularAccelerationComponent, InertiaComponent, OrientationComponent, TransformComponent, MovingComponent>(&m_scene)) {
 
         auto centerOfMassComponent = m_scene.Get<CenterOfMassComponent>(ent);
-
         auto velocityComponent = m_scene.Get<VelocityComponent>(ent);
         auto accelerationComponent = m_scene.Get<AccelerationComponent>(ent);
         auto transformComponent = m_scene.Get<TransformComponent>(ent);
         auto orientationComponent = m_scene.Get<OrientationComponent>(ent);
+        auto angularVelocityComponent = m_scene.Get<AngularVelocityComponent>(ent);
+        auto angularAccelerationComponent = m_scene.Get<AngularAccelerationComponent>(ent);
 
         centerOfMassComponent->centerOfMass += velocityComponent->velocity * deltaTime;
 
@@ -145,18 +132,22 @@ void Renderer::update(float deltaTime) {
                 velocityComponent->velocity * std::pow(damping, deltaTime) +
                 accelerationComponent->acceleration * deltaTime;
 
+        angularVelocityComponent->angularVelocity += angularAccelerationComponent->angularAcceleration * deltaTime;
+
+        orientationComponent->orientation += angularVelocityComponent->angularVelocity * deltaTime;
         Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
     }
 
     // Check collision circle box
-    for (EntityID cEntity : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
+    for (EntityID cEntity : SceneView<VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent, CenterOfMassComponent>(&m_scene)) {
         auto circleComp = m_scene.Get<CircleComponent>(cEntity);
-        auto cPos = m_scene.Get<PositionComponent>(cEntity);
+        auto cPos = m_scene.Get<CenterOfMassComponent>(cEntity);
         auto cVel = m_scene.Get<VelocityComponent>(cEntity);
-        auto cAcc = m_scene.Get<AccelerationComponent>(cEntity);
         auto cMass = m_scene.Get<MassComponent>(cEntity);
+        auto cAngVel = m_scene.Get<AngularVelocityComponent>(cEntity);
+        auto cInvInertia = m_scene.Get<InertiaComponent>(cEntity);
 
-        for (EntityID boxEntity : SceneView<BoxComponent, MassComponent, CenterOfMassComponent, TransformComponent>(&m_scene)) {
+        for (EntityID boxEntity : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
             // Can't be a boxEntity and circleEntity at the same time
             assert(boxEntity != cEntity);
 
@@ -164,11 +155,15 @@ void Renderer::update(float deltaTime) {
             auto transfComp = m_scene.Get<TransformComponent>(boxEntity);
             auto boxMass = m_scene.Get<MassComponent>(boxEntity);
             auto boxCenter = m_scene.Get<CenterOfMassComponent>(boxEntity);
+            auto boxVelocity = m_scene.Get<VelocityComponent>(boxEntity);
+            auto boxAngularVelocity = m_scene.Get<AngularVelocityComponent>(boxEntity);
+            auto boxInverseInertia = m_scene.Get<InertiaComponent>(boxEntity);
 
             Manifold m{};
             std::vector<glm::vec3> boxVertices = Transformations::getWorldVertices(boxComp->vertices, transfComp->transformMatrix);
-            if (m.CirclevsBox(cPos->position, circleComp->radius, boxVertices, boxCenter->centerOfMass)) {
-                PhysicsEngine::resolveCollisionAABBCircle(boxVertices, cPos->position, cVel->velocity, cMass->inverseMass, circleComp->radius);
+            if (m.CirclevsBox(cPos->centerOfMass, circleComp->radius, boxVertices, boxCenter->centerOfMass)) {
+                PhysicsEngine::resolveCollisionBoxCircle(m, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxInverseInertia->invInertia,
+                    boxMass->inverseMass, cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cMass->inverseMass, cInvInertia->invInertia);
             }
         }
     }
@@ -264,17 +259,31 @@ Renderer::Renderer(): m_objects(new std::vector<Object*>()) ,m_VAO(-1), m_VBO(-1
 
 void Renderer::insertCircle(float centerX, float centerY, float radius) {
     EntityID circle = m_scene.NewEntity();
-    auto *positionComponent = m_scene.Assign<PositionComponent>(circle);
-    auto *velocityComponent = m_scene.Assign<VelocityComponent>(circle);
-    auto *accelerationComponent = m_scene.Assign<AccelerationComponent>(circle);
-    auto *massComponent = m_scene.Assign<MassComponent>(circle);
-    auto *circleComponent = m_scene.Assign<CircleComponent>(circle);
+    auto centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(circle);
+    auto velocityComponent = m_scene.Assign<VelocityComponent>(circle);
+    auto accelerationComponent = m_scene.Assign<AccelerationComponent>(circle);
+    auto massComponent = m_scene.Assign<MassComponent>(circle);
+    auto circleComponent = m_scene.Assign<CircleComponent>(circle);
+    auto avComponent = m_scene.Assign<AngularVelocityComponent>(circle);
+    auto aaComponent = m_scene.Assign<AngularAccelerationComponent>(circle);
+    auto inertiaComponent = m_scene.Assign<InertiaComponent>(circle);
+    auto orientationComponent = m_scene.Assign<OrientationComponent>(circle);
+    auto transformComponent = m_scene.Assign<TransformComponent>(circle);
+    m_scene.Assign<MovingComponent>(circle);
 
-    positionComponent->position = glm::vec3(centerX, centerY, 0.0f);
+    centerOfMassComponent->centerOfMass = glm::vec3(centerX, centerY, 0.0f);
     velocityComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     massComponent->inverseMass = 1.0f;
     accelerationComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
     circleComponent->radius = radius;
+    avComponent->angularVelocity = 0.0f;
+    aaComponent->angularAcceleration = 0.0f;
+    inertiaComponent->invInertia = 1.0f;
+
+    orientationComponent->orientation = 0.0f;
+    transformComponent->transformMatrix = glm::mat4(1.0f);
+
+    Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
 
 #if false
@@ -293,14 +302,31 @@ void Renderer::insertStaticBox(const glm::vec3& position, float width, float hei
     auto *boxComponent = m_scene.Assign<BoxComponent>(box);
     auto *massComponent = m_scene.Assign<MassComponent>(box);
     auto *centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(box);
+    auto *velocityComponent = m_scene.Assign<VelocityComponent>(box);
+    auto *accelerationComponent = m_scene.Assign<AccelerationComponent>(box);
+    auto *avComponent = m_scene.Assign<AngularVelocityComponent>(box);
+    auto *aaComponent = m_scene.Assign<AngularAccelerationComponent>(box);
+    auto *inertiaComponent = m_scene.Assign<InertiaComponent>(box);
+    auto *orientationComponent = m_scene.Assign<OrientationComponent>(box);
     auto *transformComponent = m_scene.Assign<TransformComponent>(box);
 
     boxComponent->vertices = createBoxVertices(width, height);
 
     centerOfMassComponent->centerOfMass = position;
-    massComponent->inverseMass = std::numeric_limits<float>::max();
+    massComponent->inverseMass = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
-    Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, 0.0f);
+
+    velocityComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    accelerationComponent->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    avComponent->angularVelocity = 0.0f;
+    aaComponent->angularAcceleration = 0.0f;
+    inertiaComponent->invInertia = 0.0f;
+
+    orientationComponent->orientation = 0.0f;
+    transformComponent->transformMatrix = glm::mat4(1.0f);
+
+    Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
 
 void Renderer::insertBox(const glm::vec3& position, float width, float height) {
@@ -315,6 +341,7 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
     auto *inertiaComponent = m_scene.Assign<InertiaComponent>(box);
     auto *orientationComponent = m_scene.Assign<OrientationComponent>(box);
     auto *transformComponent = m_scene.Assign<TransformComponent>(box);
+    m_scene.Assign<MovingComponent>(box);
 
     boxComponent->vertices = createBoxVertices(width, height);
 
@@ -326,7 +353,7 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
 
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;
-    inertiaComponent->inertia = 1.0f;
+    inertiaComponent->invInertia = 10.0f;
 
     // inertiaComponent->inertia = PhysicsEngine::calculateMomentOfInertia(min, max, 1.0f / massComponent->inverseMass);
     orientationComponent->orientation = 0.0f;
@@ -353,7 +380,7 @@ void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
     velComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     accComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
     massComponent->inverseMass = 1.0f;
-    inertiaComponent->inertia = Polygon::calculateRotationalInertia(vertices, massComponent->inverseMass);
+    inertiaComponent->invInertia = Polygon::calculateRotationalInertia(vertices, massComponent->inverseMass);
 
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;

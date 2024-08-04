@@ -17,3 +17,7 @@ std::vector<glm::vec3> Transformations::getWorldVertices(const std::vector<glm::
     }
     return worldVertices;
 }
+
+float Transformations::cross(const glm::vec2& a, const glm::vec2& b) {
+    return a.x * b.y - a.y * b.x;
+}
