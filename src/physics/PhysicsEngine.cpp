@@ -98,8 +98,8 @@ bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb,
 void PhysicsEngine::resolveCollisionAABBCircle(const std::vector<glm::vec3> &boxVertices, glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float circleInverseMass, float circleRadius) {
   glm::vec3 closestPoint;
 
-  glm::vec3 min = boxVertices[2];
-  glm::vec3 max = boxVertices[0];
+  glm::vec3 min = boxVertices[0];
+  glm::vec3 max = boxVertices[2];
   closestPoint.x =
       std::max(min.x, std::min(circleCenter.x, max.x));
   closestPoint.y =
