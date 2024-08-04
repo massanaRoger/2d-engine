@@ -11,6 +11,7 @@
 #include "contacts.h"
 #include "glm/gtx/norm.hpp"
 
+#if false
 bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
 
     // Get the vertices of the AABB
@@ -43,6 +44,7 @@ bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
     penetration = minPenetration;
     return true;
 }
+#endif
 
 bool Manifold::CirclevsCircle(Circle &circle1, Circle &circle2) {
     // Vector from A to B
@@ -73,6 +75,7 @@ bool Manifold::CirclevsCircle(Circle &circle1, Circle &circle2) {
     }
 }
 
+#if false
 bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
     glm::vec3 aabbCenter = glm::vec3((aabb.aabbc->min + aabb.aabbc->max) / 2.0f);
     glm::vec3 n = aabbCenter - circle.pc->position;
@@ -133,6 +136,7 @@ bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
         }
     return true;
 }
+#endif
 
 bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, const std::vector<glm::vec3> &boxVertices, const glm::vec3 &boxCenter) {
     normal = glm::vec3{};

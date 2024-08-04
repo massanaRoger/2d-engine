@@ -25,8 +25,7 @@ struct CircleComponent {
 };
 
 struct BoxComponent {
-    glm::vec3 min{0.0f};
-    glm::vec3 max{0.0f};
+    std::vector<glm::vec3> vertices;
 };
 
 struct CenterOfMassComponent {
@@ -52,4 +51,8 @@ struct InertiaComponent {
 
 struct OrientationComponent {
     float orientation;
+};
+
+struct TransformComponent {
+    glm::mat4 transformMatrix;
 };

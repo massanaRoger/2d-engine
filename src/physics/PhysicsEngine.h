@@ -16,7 +16,7 @@ public:
                                          const Circle &circle2);
   static void resolveCollisionCircleCircle(Circle &circle1, Circle &circle2);
   static bool checkCollisionAABBCircle(const AABB &aabb, const Circle &circle);
-  static void resolveCollisionAABBCircle(Manifold &m, AABB &aabb, Circle &circle);
+  static void resolveCollisionAABBCircle(const std::vector<glm::vec3> &boxVertices, glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float circleInverseMass, float circleRadius);
 
   static void positionalCorrection(Circle &circle1, Circle &circle2);
   static bool checkCollisionPolygonPolygon(const Polygon &p1,

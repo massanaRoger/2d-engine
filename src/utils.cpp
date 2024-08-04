@@ -73,10 +73,10 @@ std::vector<glm::vec3> calculateAABBvertices(const glm::vec3 &min, const glm::ve
 
     vertices.reserve(4);
 
-    vertices.emplace_back(min);
-    vertices.emplace_back(max.x, min.y, 0.0f);
     vertices.emplace_back(max);
     vertices.emplace_back(min.x, max.y, 0.0f);
+    vertices.emplace_back(min);
+    vertices.emplace_back(max.x, min.y, 0.0f);
 
     return vertices;
 }

@@ -55,6 +55,8 @@ add_executable(${PROJECT_NAME}
         src/Box.cpp
         src/physics/contacts.cpp
         src/physics/contacts.h
+        src/physics/Transformations.cpp
+        src/physics/Transformations.h
 )
 
 # Define the current working directory as a macro

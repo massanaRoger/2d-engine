@@ -78,6 +78,7 @@ void PhysicsEngine::resolveCollisionCircleCircle(Circle &circle1,
   circle2.vc->velocity = circle2.vc->velocity + impulse * circle2.mc->inverseMass;
 }
 
+#if false
 bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb,
                                              const Circle &circle) {
   const float closestX =
@@ -92,19 +93,23 @@ bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb,
       (distanceX * distanceX) + (distanceY * distanceY);
   return distanceSquared < (circle.cc->radius * circle.cc->radius);
 }
+#endif
 
-void PhysicsEngine::resolveCollisionAABBCircle(Manifold &m, AABB &aabb, Circle &circle) {
+void PhysicsEngine::resolveCollisionAABBCircle(const std::vector<glm::vec3> &boxVertices, glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float circleInverseMass, float circleRadius) {
   glm::vec3 closestPoint;
-  closestPoint.x =
-      std::max(aabb.aabbc->min.x, std::min(circle.pc->position.x, aabb.aabbc->max.x));
-  closestPoint.y =
-      std::max(aabb.aabbc->min.y, std::min(circle.pc->position.y, aabb.aabbc->max.y));
-  closestPoint.z = 0; // Assuming 2D collision
 
-  glm::vec3 collisionNormal = circle.pc->position - closestPoint;
+  glm::vec3 min = boxVertices[2];
+  glm::vec3 max = boxVertices[0];
+  closestPoint.x =
+      std::max(min.x, std::min(circleCenter.x, max.x));
+  closestPoint.y =
+      std::max(min.y, std::min(circleCenter.y, max.y));
+  closestPoint.z = 0;
+
+  glm::vec3 collisionNormal = circleCenter - closestPoint;
   collisionNormal = glm::normalize(collisionNormal);
 
-  glm::vec3 relativeVelocity = circle.vc->velocity;
+  glm::vec3 relativeVelocity = circleVelocity;
 
   float velocityAlongNormal = glm::dot(relativeVelocity, collisionNormal);
   if (velocityAlongNormal > 0) {
@@ -114,16 +119,16 @@ void PhysicsEngine::resolveCollisionAABBCircle(Manifold &m, AABB &aabb, Circle &
   // Calculate restitution
   float e = 1.0f;
   float j = -(1 + e) * velocityAlongNormal;
-  j /= circle.mc->inverseMass;
+  j /= circleInverseMass;
 
   glm::vec3 impulse = collisionNormal * j;
-  circle.vc->velocity = circle.vc->velocity + impulse * circle.mc->inverseMass;
+  circleVelocity = circleVelocity + impulse * circleInverseMass;
 
   // Ensure the circle is pushed out of the AABB
   float penetrationDepth =
-      circle.cc->radius - glm::length(circle.pc->position - closestPoint);
+      circleRadius - glm::length(circleCenter - closestPoint);
   if (penetrationDepth > 0) {
-    circle.pc->position += collisionNormal * penetrationDepth;
+    circleCenter += collisionNormal * penetrationDepth;
   }
 }
 
@@ -147,30 +152,6 @@ bool PhysicsEngine::checkCollisionPolygonPolygon(const Polygon &p1,
   }
   return true;
 }
-
-bool PhysicsEngine::checkCollisionPolygonAABB(const Polygon &p,
-                                              const AABB &aabb) {
-  std::vector<glm::vec3> pVertices = p.pc->vertices;
-  std::vector<glm::vec3> normals1 = calculateNormals(pVertices);
-
-  std::vector<glm::vec3> aabbVertices =
-      calculateAABBvertices(aabb.aabbc->min, aabb.aabbc->max);
-  std::vector<glm::vec3> normals2 = calculateNormals(aabbVertices);
-
-  for (auto &normal : normals1) {
-    if (!overlapOnAxis(pVertices, aabbVertices, normal)) {
-      return false;
-    }
-  }
-
-  for (auto &normal : normals2) {
-    if (!overlapOnAxis(pVertices, aabbVertices, normal)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 
 bool PhysicsEngine::checkCollisionBoxBox(const Box &box1, const Box &box2) {
   std::vector<glm::vec3> vertices1 = calculateAABBvertices(*(box1.min), *(box1.max));
