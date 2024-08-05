@@ -47,7 +47,7 @@ bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, co
 
         glm::vec3 edge = vb - va;
         glm::vec3 axis = glm::vec3(-edge.y, edge.x, 0.0f);
-
+        axis = glm::normalize(axis);
 
         projectPolygon(boxVertices, axis, minA, maxA);
         projectCircle(circleCenter, circleRadius, axis, minB, maxB);
@@ -68,6 +68,7 @@ bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, co
     glm::vec3 cp = boxVertices[cpIndex];
 
     glm::vec3 axis = cp - circleCenter;
+    axis = glm::normalize(axis);
 
     projectPolygon(boxVertices, axis, minA, maxA);
     projectCircle(circleCenter, circleRadius, axis, minB, maxB);
@@ -108,6 +109,7 @@ bool Manifold::BoxvsBox(const std::vector<glm::vec3> &boxVerticesA, const glm::v
 
         glm::vec3 edge = vb - va;
         glm::vec3 axis(-edge.y, edge.x, 0.0f);
+        axis = glm::normalize(axis);
 
         float minA, maxA;
         float minB, maxB;
@@ -130,6 +132,7 @@ bool Manifold::BoxvsBox(const std::vector<glm::vec3> &boxVerticesA, const glm::v
 
         glm::vec3 edge = vb - va;
         glm::vec3 axis(-edge.y, edge.x, 0.0f);
+        axis = glm::normalize(axis);
 
         float minA, maxA;
         float minB, maxB;

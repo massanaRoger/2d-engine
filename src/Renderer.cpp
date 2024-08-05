@@ -12,7 +12,6 @@
 #include "SceneView.h"
 #include "utils.h"
 #include "components/Components.h"
-#include "glm/ext/vector_float3.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/string_cast.hpp"
 #include "shader/Shader.h"
