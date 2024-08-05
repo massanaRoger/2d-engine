@@ -162,8 +162,9 @@ void Renderer::update(float deltaTime) {
             Manifold m{};
             std::vector<glm::vec3> boxVertices = Transformations::getWorldVertices(boxComp->vertices, transfComp->transformMatrix);
             if (m.CirclevsBox(cPos->centerOfMass, circleComp->radius, boxVertices, boxCenter->centerOfMass)) {
-                PhysicsEngine::resolveRotationalCollision(m, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxInverseInertia->invInertia,
-                    boxMass->inverseMass, cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cMass->inverseMass, cInvInertia->invInertia);
+                m.ApplyPositionalCorrection(cPos->centerOfMass, boxCenter->centerOfMass, cMass->inverseMass, boxMass->inverseMass);
+                PhysicsEngine::resolveRotationalCollision(m,  cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cMass->inverseMass, cInvInertia->invInertia, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxInverseInertia->invInertia,
+                    boxMass->inverseMass);
             }
         }
     }
@@ -197,6 +198,7 @@ void Renderer::update(float deltaTime) {
             std::vector<glm::vec3> boxVertices2 = Transformations::getWorldVertices(boxComp2->vertices, transfComp2->transformMatrix);
 
             if (m.BoxvsBox(boxVertices1, boxCenter1->centerOfMass, boxVertices2, boxCenter2->centerOfMass)) {
+                m.ApplyPositionalCorrection(boxCenter1->centerOfMass, boxCenter2->centerOfMass, boxMass1->inverseMass, boxMass2->inverseMass);
                 PhysicsEngine::resolveRotationalCollision(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
                     boxMass1->inverseMass, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity, boxMass2->inverseMass, boxInverseInertia2->invInertia);
             }
@@ -227,6 +229,7 @@ void Renderer::update(float deltaTime) {
             Manifold m{};
 
             if (m.CirclevsCircle(cPos1->centerOfMass, circleComp1->radius, cPos2->centerOfMass, circleComp2->radius)) {
+                m.ApplyPositionalCorrection(cPos1->centerOfMass, cPos2->centerOfMass, cMass1->inverseMass, cMass2->inverseMass);
                 PhysicsEngine::resolveRotationalCollision(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
                     cMass1->inverseMass, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity, cMass2->inverseMass, cInertia2->invInertia);
             }

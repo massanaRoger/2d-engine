@@ -3,7 +3,6 @@
 //
 
 #include "Manifold.h"
-#include "../Polygon.h"
 #include "../utils.h"
 #include <limits>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -11,103 +10,14 @@
 #include "contacts.h"
 #include "glm/gtx/norm.hpp"
 
-#if false
-bool Manifold::PolygonvsAABB(Polygon &polygon, AABB &aabb) {
-
-    // Get the vertices of the AABB
-    std::vector aabbVertices = {
-        glm::vec3(aabb.aabbc->min.x, aabb.aabbc->min.y, 0.0f),
-        glm::vec3(aabb.aabbc->max.x, aabb.aabbc->min.y, 0.0f),
-        glm::vec3(aabb.aabbc->max.x, aabb.aabbc->max.y, 0.0f),
-        glm::vec3(aabb.aabbc->min.x, aabb.aabbc->max.y, 0.0f)
-    };
-
-    std::vector<glm::vec3> normals = calculateNormals(polygon.pc->vertices);
-    normals.emplace_back(1.0f, 0.0f, 0.0f); // AABB's normal (x-axis)
-    normals.emplace_back(0.0f, 1.0f, 0.0f); // AABB's normal (y-axis)
-    
-    float minPenetration = std::numeric_limits<float>::max();
-    glm::vec3 collisionNormal;
-
-    for (const auto& vertexNormal : normals) {
-        float min1, max1, min2, max2;
-        projectPolygon(polygon.pc->vertices, vertexNormal, min1, max1);
-        projectPolygon(aabbVertices, vertexNormal, min2, max2);
-        float penetrationDepth = std::min(max1, max2) - std::max(min1, min2);
-        if (penetrationDepth < minPenetration) {
-            minPenetration = penetrationDepth;
-            collisionNormal = vertexNormal;
-        }
-    }
-
-    normal = collisionNormal;
-    penetration = minPenetration;
-    return true;
+void Manifold::ApplyPositionalCorrection(glm::vec3& positionA, glm::vec3& positionB, float invMassA, float invMassB) const {
+    const float percent = 0.8f;
+    const float slop = 0.01f;
+    float totalInvMass = invMassA + invMassB;
+    glm::vec3 correction = std::max(penetration - slop, 0.0f) / totalInvMass * percent * normal;
+    positionA -= correction * invMassA;
+    positionB += correction * invMassB;
 }
-#endif
-
-#if false
-bool Manifold::AABBvsCircle(AABB &aabb, Circle &circle) {
-    glm::vec3 aabbCenter = glm::vec3((aabb.aabbc->min + aabb.aabbc->max) / 2.0f);
-    glm::vec3 n = aabbCenter - circle.pc->position;
-
-    // Closest point on A to center of B
-    glm::vec3 closest = n;
-    // Calculate half extents along each axis
-    float x_extent = (aabb.aabbc->max.x - aabb.aabbc->min.x) / 2;
-    float y_extent = (aabb.aabbc->max.y - aabb.aabbc->min.y) / 2;
-    // Clamp point to edges of the AABB
-    closest.x = glm::clamp(-x_extent, x_extent, closest.x);
-    closest.y = glm::clamp(-y_extent,y_extent, closest.y);
-    bool inside = false;
-    // Circle is inside the AABB, so we need to clamp the circle's center
-    // to the closest edge
-    if(n == closest)
-    {
-        inside = true;
-        // Find closest axis
-        if(abs( n.x ) > abs( n.y ))
-        {
-            // Clamp to closest extent
-            if(closest.x > 0)
-                closest.x = x_extent;
-              else
-                  closest.x = -x_extent;
-              }
-        // y axis is shorter
-        else
-        {
-            // Clamp to closest extent
-            if(closest.y > 0)
-                closest.y = y_extent;
-              else
-                  closest.y = -y_extent;
-              }
-    }
-    glm::vec3 tempNorm = n - closest;
-    float d = glm::length2(tempNorm);
-    float r = circle.cc->radius;
-    // Early out of the radius is shorter than distance to closest point and
-    // Circle not inside the AABB
-    if(d > r * r && !inside)
-        return false;
-      // Avoided sqrt until we needed
-      d = glm::length(tempNorm);
-      // Collision normal needs to be flipped to point outside if circle was
-      // inside the AABB
-      if(inside)
-      {
-          normal = -n;
-          penetration = r - d;
-        }
-      else
-      {
-          normal = n;
-          penetration = r - d;
-        }
-    return true;
-}
-#endif
 
 bool Manifold::CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB, float radiusB) {
     glm::vec3 ab = centerB - centerA;
@@ -178,7 +88,7 @@ bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, co
 
     glm::vec3 direction = boxCenter - circleCenter;
 
-    if (glm::dot(direction, normal) > 0.0f) {
+    if (glm::dot(direction, normal) < 0.0f) {
         normal = -normal;
     }
 
@@ -242,7 +152,7 @@ bool Manifold::BoxvsBox(const std::vector<glm::vec3> &boxVerticesA, const glm::v
 
     glm::vec3 direction = boxCenterB - boxCenterA;
 
-    if (glm::dot(direction, normal) < 0) {
+    if (glm::dot(direction, normal) < 0.0f) {
         normal = -normal;
     }
 

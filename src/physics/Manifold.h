@@ -14,6 +14,7 @@ struct Manifold {
     glm::vec3 contactPoint2;
     int nContacts;
 
+    void ApplyPositionalCorrection(glm::vec3& positionA, glm::vec3& positionB, float invMassA, float invMassB) const;
     bool CirclevsCircle(Circle &circle1, Circle &circle2);
     bool CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB, float radiusB);
     bool AABBvsCircle(AABB &aabb, Circle &circle);

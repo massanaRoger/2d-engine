@@ -97,9 +97,9 @@ bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb,
 }
 #endif
 
-void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec3 &boxCenter,
-  glm::vec3 &boxLinearVelocity, float &boxAngularVelocity, float boxInvInertia, float boxInvMass,
-  glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float &circleAngularVelocity, float circleInverseMass, float circleInverseInertia) {
+void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec3 &boxCenter1,
+  glm::vec3 &boxLinearVelocity1, float &boxAngularVelocity1, float boxInvInertia1, float boxInvMass1,
+  glm::vec3 &boxCenter2, glm::vec3 &boxLinearVelocity2, float &boxAngularVelocity2, float boxInverseMass2, float boxInverseInertia2) {
 
   // Todo: calculate minimum restitution between the box and circle, for the moment we assume arbitrary value
   float e = 0.7f;
@@ -117,8 +117,8 @@ void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec
   bool ignoreContact[2] = {false, false};
 
   for (int i = 0; i < m.nContacts; i++) {
-    glm::vec3 ra = contactList[i] - boxCenter;
-    glm::vec3 rb = contactList[i] - circleCenter;
+    glm::vec3 ra = contactList[i] - boxCenter1;
+    glm::vec3 rb = contactList[i] - boxCenter2;
 
     raList[i] = ra;
     rbList[i] = rb;
@@ -126,10 +126,10 @@ void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec
     glm::vec3 raPerp(ra.y, -ra.x, 0.0f);
     glm::vec3 rbPerp(rb.y, -rb.x, 0.0f);
 
-    glm::vec3 angularLinearVelocityA = raPerp * boxAngularVelocity;
-    glm::vec3 angularLinearVelocityB = rbPerp * circleAngularVelocity;
+    glm::vec3 angularLinearVelocityA = raPerp * boxAngularVelocity1;
+    glm::vec3 angularLinearVelocityB = rbPerp * boxAngularVelocity2;
 
-    glm::vec3 relativeVelocity = (circleVelocity + angularLinearVelocityB) - (boxLinearVelocity + angularLinearVelocityA);
+    glm::vec3 relativeVelocity = (boxLinearVelocity2 + angularLinearVelocityB) - (boxLinearVelocity1 + angularLinearVelocityA);
 
     float contactVelocityMagnitude = glm::dot(relativeVelocity, m.normal);
 
@@ -141,9 +141,9 @@ void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec
     float raPerpDotN = glm::dot(raPerp, m.normal);
     float rbPerpDotN = glm::dot(rbPerp, m.normal);
 
-    float denom = boxInvMass + circleInverseMass +
-      (raPerpDotN * raPerpDotN) * boxInvInertia +
-      (rbPerpDotN * rbPerpDotN) * circleInverseInertia;
+    float denom = boxInvMass1 + boxInverseMass2 +
+      (raPerpDotN * raPerpDotN) * boxInvInertia1 +
+      (rbPerpDotN * rbPerpDotN) * boxInverseInertia2;
 
     float j = -(1.0f + e) * contactVelocityMagnitude;
     j /= denom;
@@ -158,10 +158,10 @@ void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec
     if (ignoreContact[i]) continue;
     glm::vec3 impulse = impulseList[i];
 
-    boxLinearVelocity += -impulse * boxInvMass;
-    boxAngularVelocity += -Transformations::cross(glm::vec2(raList[i].x, raList[i].y), glm::vec2(impulse.x, impulse.y)) * boxInvInertia;
-    circleVelocity += impulse * circleInverseMass;
-    circleAngularVelocity += Transformations::cross(glm::vec2(rbList[i].x, rbList[i].y), glm::vec2(impulse.x, impulse.y)) * circleInverseInertia;
+    boxLinearVelocity1 += -impulse * boxInvMass1;
+    boxAngularVelocity1 += -Transformations::cross(glm::vec2(raList[i].x, raList[i].y), glm::vec2(impulse.x, impulse.y)) * boxInvInertia1;
+    boxLinearVelocity2 += impulse * boxInverseMass2;
+    boxAngularVelocity2 += Transformations::cross(glm::vec2(rbList[i].x, rbList[i].y), glm::vec2(impulse.x, impulse.y)) * boxInverseInertia2;
   }
 
 }
