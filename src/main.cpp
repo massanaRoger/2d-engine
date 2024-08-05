@@ -107,7 +107,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
   if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
     if (isPointerCursor) {
       if (polygonToInsert.size() > 2) {
-        renderer->insertPolygon(std::move(polygonToInsert));
+        //renderer->insertPolygon(std::move(polygonToInsert));
         polygonToInsert.clear();
       }
       glfwSetCursor(window, nullptr);

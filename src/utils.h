@@ -1,6 +1,5 @@
 #ifndef UTILS_H
 #define UTILS_H
-#include "Polygon.h"
 #include "glm/fwd.hpp"
 #include <string>
 #include <vector>

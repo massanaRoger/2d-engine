@@ -3,14 +3,11 @@
 #include <iostream>
 #include <memory>
 
-#include "Polygon.h"
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include "Object.h"
 #include "Scene.h"
 #include "SceneView.h"
 #include "utils.h"
@@ -325,25 +322,3 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
 
-
-void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
-    EntityID polygon = m_scene.NewEntity();
-    auto *polygonComponent = m_scene.Assign<PolygonComponent>(polygon);
-    auto *avComponent = m_scene.Assign<AngularVelocityComponent>(polygon);
-    auto *aaComponent = m_scene.Assign<AngularAccelerationComponent>(polygon);
-    auto *accComponent = m_scene.Assign<AccelerationComponent>(polygon);
-    auto *velComponent = m_scene.Assign<VelocityComponent>(polygon);
-    auto *massComponent = m_scene.Assign<MassComponent>(polygon);
-    auto *inertiaComponent = m_scene.Assign<InertiaComponent>(polygon);
-
-    polygonComponent->vertices = vertices;
-    polygonComponent->rotation = 0;
-
-    velComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-    accComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
-    massComponent->inverseMass = 1.0f;
-    inertiaComponent->invInertia = Polygon::calculateRotationalInertia(vertices, massComponent->inverseMass);
-
-    avComponent->angularVelocity = 0.0f;
-    aaComponent->angularAcceleration = 0.0f;
-}

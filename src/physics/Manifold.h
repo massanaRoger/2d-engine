@@ -1,11 +1,7 @@
 #ifndef MANIFOLD_H
 #define MANIFOLD_H
-#include "../AABB.h"
-#include "../Box.h"
-#include "../Circle.h"
-#include "../Object.h"
-#include "../Polygon.h"
 #include "glm/vec3.hpp"
+#include <vector>
 
 struct Manifold {
     glm::vec3 normal;
@@ -15,13 +11,9 @@ struct Manifold {
     int nContacts;
 
     void ApplyPositionalCorrection(glm::vec3& positionA, glm::vec3& positionB, float invMassA, float invMassB) const;
-    bool CirclevsCircle(Circle &circle1, Circle &circle2);
     bool CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB, float radiusB);
-    bool AABBvsCircle(AABB &aabb, Circle &circle);
-    bool PolygonvsAABB(Polygon &polygon, AABB &aabb);
-    bool CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, const std::vector<glm::vec3> &boxVertices, const glm::vec3 &boxCenter);
     bool BoxvsBox(const std::vector<glm::vec3> &boxVerticesA, const glm::vec3 &boxCenterA, const std::vector<glm::vec3> &boxVerticesB, const glm::vec3 &boxCenterB);
-
+    bool CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, const std::vector<glm::vec3> &boxVertices, const glm::vec3 &boxCenter);
 };
 
 #endif

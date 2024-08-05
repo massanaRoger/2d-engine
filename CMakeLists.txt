@@ -40,23 +40,16 @@ add_executable(${PROJECT_NAME}
         src/main.cpp
         src/shader/Shader.cpp
         src/utils.cpp
-        src/Circle.cpp
         src/Renderer.cpp
         src/physics/PhysicsEngine.cpp
-        src/AABB.cpp
-        src/Object.cpp
         src/physics/Manifold.cpp
-        src/Polygon.cpp
         src/Scene.cpp
         src/ComponentPool.cpp
         src/SceneView.cpp
         src/components/Components.cpp
         src/component.cpp
-        src/Box.cpp
         src/physics/contacts.cpp
-        src/physics/contacts.h
         src/physics/Transformations.cpp
-        src/physics/Transformations.h
 )
 
 # Define the current working directory as a macro

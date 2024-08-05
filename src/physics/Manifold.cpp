@@ -1,7 +1,3 @@
-//
-// Created by Roger2 on 08/07/2024.
-//
-
 #include "Manifold.h"
 #include "../utils.h"
 #include <limits>
