@@ -3,8 +3,6 @@
 #include <iostream>
 #include <memory>
 
-#include "AABB.h"
-#include "Circle.h"
 #include "Polygon.h"
 
 #include <glad/glad.h>
@@ -75,45 +73,13 @@ void Renderer::draw(Shader &shader) {
         glBindVertexArray(m_VAO);
         glDrawArrays(GL_TRIANGLE_FAN, 0, boxComponent->vertices.size());
     }
-/*
-    for (EntityID ent : SceneView<PolygonComponent>(&m_scene)) {
-        auto *polygonComponent = m_scene.Get<PolygonComponent>(ent);
-
-        glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-        glBufferData(GL_ARRAY_BUFFER, polygonComponent->vertices.size() * sizeof(glm::vec3), polygonComponent->vertices.data(), GL_STATIC_DRAW);
-
-        auto transform = glm::mat4(1.0f);
-
-        transform = glm::rotate(transform, glm::radians(polygonComponent->rotation), glm::vec3(0.0, 0.0, 1.0));
-
-        GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]);
-
-        shader.setInt("u_objType", 2);
-
-        glBindVertexArray(m_VAO);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, polygonComponent->vertices.size());
-    }*/
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
 void Renderer::update(float deltaTime) {
-    float damping = 0.5f;
-
-    // Update polygons
-    /*for (EntityID ent : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent>(&m_scene)) {
-        auto *polygonComponent = m_scene.Get<PolygonComponent>(ent);
-        auto velocityComponent = m_scene.Get<VelocityComponent>(ent);
-        auto accelerationComponent = m_scene.Get<AccelerationComponent>(ent);
-
-        for (auto &v : polygonComponent->vertices) {
-            v = v + velocityComponent->velocity * deltaTime;
-        }
-
-        velocityComponent->velocity = velocityComponent->velocity * std::pow(damping, deltaTime) + accelerationComponent->acceleration * deltaTime;
-    }*/
+    float damping = 0.3f;
 
     for (EntityID ent : SceneView<VelocityComponent, AccelerationComponent, CenterOfMassComponent,
         AngularAccelerationComponent, InertiaComponent, OrientationComponent, TransformComponent, MovingComponent>(&m_scene)) {
@@ -128,11 +94,13 @@ void Renderer::update(float deltaTime) {
 
         centerOfMassComponent->centerOfMass += velocityComponent->velocity * deltaTime;
 
+        float dampingDelta = std::pow(damping, deltaTime);
+
         velocityComponent->velocity =
-                velocityComponent->velocity * std::pow(damping, deltaTime) +
+                velocityComponent->velocity * dampingDelta +
                 accelerationComponent->acceleration * deltaTime;
 
-        angularVelocityComponent->angularVelocity += angularAccelerationComponent->angularAcceleration * deltaTime;
+        angularVelocityComponent->angularVelocity = angularVelocityComponent->angularVelocity * dampingDelta + angularAccelerationComponent->angularAcceleration * deltaTime;
 
         orientationComponent->orientation += angularVelocityComponent->angularVelocity * deltaTime;
         Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
@@ -236,47 +204,15 @@ void Renderer::update(float deltaTime) {
         }
     }
 
-/*
-    // Check collision circle polygon
-    for (EntityID cEntity : SceneView<PositionComponent, VelocityComponent, AccelerationComponent, CircleComponent, MassComponent>(&m_scene)) {
-        auto circleComp = m_scene.Get<CircleComponent>(cEntity);
-        auto cPos = m_scene.Get<PositionComponent>(cEntity);
-        auto cVel = m_scene.Get<VelocityComponent>(cEntity);
-        auto cAcc = m_scene.Get<AccelerationComponent>(cEntity);
-        auto cMass = m_scene.Get<MassComponent>(cEntity);
-
-        Circle circle(cPos, cVel, cAcc, cMass, circleComp);
-
-        for (EntityID pEntity : SceneView<PolygonComponent, VelocityComponent, AccelerationComponent, MassComponent, AngularVelocityComponent, AngularAccelerationComponent>(&m_scene)) {
-            auto polygonComp = m_scene.Get<PolygonComponent>(pEntity);
-            auto pVel = m_scene.Get<VelocityComponent>(pEntity);
-            auto pAcc = m_scene.Get<AccelerationComponent>(pEntity);
-            auto pMass = m_scene.Get<MassComponent>(pEntity);
-            auto pAngVel = m_scene.Get<AngularVelocityComponent>(pEntity);
-            auto pAngAcc = m_scene.Get<AngularAccelerationComponent>(pEntity);
-
-            Polygon polygon(pVel, pAcc, pMass, polygonComp, pAngVel, pAngAcc);
-
-            if (PhysicsEngine::checkCollisionPolygonAABB(polygon, circle)) {
-                Manifold m{};
-                m.AABBvsCircle(aabb, circle);
-                PhysicsEngine::resolveCollisionAABBCircle(m, aabb, circle);
-            }
-        }
-    }*/
 }
 
 Renderer::~Renderer() {
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
-    for (auto &obj : *m_objects) {
-        delete obj;
-    }
-    delete m_objects;
 }
 
-Renderer::Renderer(): m_objects(new std::vector<Object*>()) ,m_VAO(-1), m_VBO(-1), m_EBO(-1), m_scene() {
+Renderer::Renderer(): m_VAO(-1), m_VBO(-1), m_EBO(-1), m_scene() {
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
 
@@ -324,17 +260,6 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
 
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
-
-#if false
-void Renderer::insertAABB(float minX, float minY, float maxX, float maxY) {
-    EntityID aabb = m_scene.NewEntity();
-    auto *boxComponent = m_scene.Assign<BoxComponent>(aabb);
-    auto *massComponent = m_scene.Assign<MassComponent>(aabb);
-    boxComponent->min = glm::vec3(minX, minY, 0.0f);
-    boxComponent->max = glm::vec3(maxX, maxY, 0.0f);
-    massComponent->inverseMass = 1.0f;
-}
-#endif
 
 void Renderer::insertStaticBox(const glm::vec3& position, float width, float height) {
     EntityID box = m_scene.NewEntity();
@@ -392,14 +317,12 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
 
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;
-    inertiaComponent->invInertia = 10.0f;
+    inertiaComponent->invInertia = 1.0f;
 
     // inertiaComponent->inertia = PhysicsEngine::calculateMomentOfInertia(min, max, 1.0f / massComponent->inverseMass);
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
-
-    std::cout << "COM: " << centerOfMassComponent->centerOfMass.x << " " << centerOfMassComponent->centerOfMass.y << std::endl;
 }
 
 
@@ -423,8 +346,4 @@ void Renderer::insertPolygon(std::vector<glm::vec3>&& vertices) {
 
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;
-}
-
-std::vector<Object*>* Renderer::objects() const {
-    return m_objects;
 }

@@ -22,7 +22,6 @@ public:
 private:
     Scene m_scene;
     unsigned int m_VBO, m_VAO, m_EBO;
-    std::vector<Object*>* m_objects;
 };
 
 #endif

@@ -30,7 +30,11 @@ bool Manifold::CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm
     penetration = r - d;
     normal = ab / d;
 
-    glm::vec3 contactPoint1 = contactPointCircleCircle(centerA, radiusA, centerB);
+    if (glm::dot(ab, normal) < 0.0f) {
+        normal = -normal;
+    }
+
+    contactPoint1 = contactPointCircleCircle(centerA, radiusA, centerB);
     nContacts = 1;
     return true;
 }
