@@ -97,11 +97,11 @@ bool PhysicsEngine::checkCollisionAABBCircle(const AABB &aabb,
 }
 #endif
 
-void PhysicsEngine::resolveCollisionBoxCircle(const Manifold &m, const glm::vec3 &boxCenter,
+void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec3 &boxCenter,
   glm::vec3 &boxLinearVelocity, float &boxAngularVelocity, float boxInvInertia, float boxInvMass,
   glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float &circleAngularVelocity, float circleInverseMass, float circleInverseInertia) {
 
-  // Todo: calculate minimum restitution between the box and circle, for the moment we assume perfect elasticity
+  // Todo: calculate minimum restitution between the box and circle, for the moment we assume arbitrary value
   float e = 0.7f;
 
   std::vector<glm::vec3> contactList{};

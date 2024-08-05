@@ -162,8 +162,43 @@ void Renderer::update(float deltaTime) {
             Manifold m{};
             std::vector<glm::vec3> boxVertices = Transformations::getWorldVertices(boxComp->vertices, transfComp->transformMatrix);
             if (m.CirclevsBox(cPos->centerOfMass, circleComp->radius, boxVertices, boxCenter->centerOfMass)) {
-                PhysicsEngine::resolveCollisionBoxCircle(m, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxInverseInertia->invInertia,
+                PhysicsEngine::resolveRotationalCollision(m, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxInverseInertia->invInertia,
                     boxMass->inverseMass, cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cMass->inverseMass, cInvInertia->invInertia);
+            }
+        }
+    }
+
+    // Check collisions box box
+    for (EntityID e1 : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
+        auto boxComp1 = m_scene.Get<BoxComponent>(e1);
+        auto transfComp1 = m_scene.Get<TransformComponent>(e1);
+        auto boxMass1 = m_scene.Get<MassComponent>(e1);
+        auto boxCenter1 = m_scene.Get<CenterOfMassComponent>(e1);
+        auto boxVelocity1 = m_scene.Get<VelocityComponent>(e1);
+        auto boxAngularVelocity1 = m_scene.Get<AngularVelocityComponent>(e1);
+        auto boxInverseInertia1 = m_scene.Get<InertiaComponent>(e1);
+
+        for (EntityID e2 : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
+            // Don't compare to itself
+            if (e1 == e2) {
+                continue;
+            }
+
+            auto boxComp2 = m_scene.Get<BoxComponent>(e2);
+            auto transfComp2 = m_scene.Get<TransformComponent>(e2);
+            auto boxMass2 = m_scene.Get<MassComponent>(e2);
+            auto boxCenter2 = m_scene.Get<CenterOfMassComponent>(e2);
+            auto boxVelocity2 = m_scene.Get<VelocityComponent>(e2);
+            auto boxAngularVelocity2 = m_scene.Get<AngularVelocityComponent>(e2);
+            auto boxInverseInertia2 = m_scene.Get<InertiaComponent>(e2);
+
+            Manifold m{};
+            std::vector<glm::vec3> boxVertices1 = Transformations::getWorldVertices(boxComp1->vertices, transfComp1->transformMatrix);
+            std::vector<glm::vec3> boxVertices2 = Transformations::getWorldVertices(boxComp2->vertices, transfComp2->transformMatrix);
+
+            if (m.BoxvsBox(boxVertices1, boxCenter1->centerOfMass, boxVertices2, boxCenter2->centerOfMass)) {
+                PhysicsEngine::resolveRotationalCollision(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
+                    boxMass1->inverseMass, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity, boxMass2->inverseMass, boxInverseInertia2->invInertia);
             }
         }
     }
@@ -192,7 +227,7 @@ void Renderer::update(float deltaTime) {
             Manifold m{};
 
             if (m.CirclevsCircle(cPos1->centerOfMass, circleComp1->radius, cPos2->centerOfMass, circleComp2->radius)) {
-                PhysicsEngine::resolveCollisionBoxCircle(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
+                PhysicsEngine::resolveRotationalCollision(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
                     cMass1->inverseMass, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity, cMass2->inverseMass, cInertia2->invInertia);
             }
         }

@@ -188,3 +188,71 @@ bool Manifold::CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, co
     return true;
 }
 
+bool Manifold::BoxvsBox(const std::vector<glm::vec3> &boxVerticesA, const glm::vec3 &boxCenterA, const std::vector<glm::vec3> &boxVerticesB, const glm::vec3 &boxCenterB) {
+    normal = glm::vec3(1.0f);
+    penetration = std::numeric_limits<float>::max();
+
+    for (int i = 0; i < boxVerticesA.size(); i++) {
+        glm::vec3 va = boxVerticesA[i];
+        glm::vec3 vb = boxVerticesA[(i + 1) % boxVerticesA.size()];
+
+        glm::vec3 edge = vb - va;
+        glm::vec3 axis(-edge.y, edge.x, 0.0f);
+
+        float minA, maxA;
+        float minB, maxB;
+        projectPolygon(boxVerticesA, axis, minA, maxA);
+        projectPolygon(boxVerticesB, axis, minB, maxB);
+
+        if (minA >= maxB || minB >= maxA) {
+            return false;
+        }
+
+        float axisDepth = std::min(maxB - minA, maxA - minB);
+        if (axisDepth < penetration) {
+            penetration = axisDepth;
+            normal = axis;
+        }
+    }
+    for (int i = 0; i < boxVerticesB.size(); i++) {
+        glm::vec3 va = boxVerticesB[i];
+        glm::vec3 vb = boxVerticesB[(i + 1) % boxVerticesB.size()];
+
+        glm::vec3 edge = vb - va;
+        glm::vec3 axis(-edge.y, edge.x, 0.0f);
+
+        float minA, maxA;
+        float minB, maxB;
+        projectPolygon(boxVerticesA, axis, minA, maxA);
+        projectPolygon(boxVerticesB, axis, minB, maxB);
+
+        if (minA >= maxB || minB >= maxA) {
+            return false;
+        }
+
+        float axisDepth = std::min(maxB - minA, maxA - minB);
+        if (axisDepth < penetration) {
+            penetration = axisDepth;
+            normal = axis;
+        }
+    }
+
+    penetration /= glm::length(normal);
+    normal = glm::normalize(normal);
+
+    glm::vec3 direction = boxCenterB - boxCenterA;
+
+    if (glm::dot(direction, normal) < 0) {
+        normal = -normal;
+    }
+
+    ContactPoints contactPoints = contactPointsBoxBox(boxVerticesA, boxVerticesB);
+
+    contactPoint1 = contactPoints.contact1;
+    contactPoint2 = contactPoints.contact2;
+    nContacts = contactPoints.nContacts;
+
+    return true;
+}
+
+

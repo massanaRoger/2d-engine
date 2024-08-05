@@ -18,8 +18,9 @@ struct Manifold {
     bool CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB, float radiusB);
     bool AABBvsCircle(AABB &aabb, Circle &circle);
     bool PolygonvsAABB(Polygon &polygon, AABB &aabb);
-    bool BoxvsBox(Box &box1, Box &box2);
     bool CirclevsBox(const glm::vec3 &circleCenter, float circleRadius, const std::vector<glm::vec3> &boxVertices, const glm::vec3 &boxCenter);
+    bool BoxvsBox(const std::vector<glm::vec3> &boxVerticesA, const glm::vec3 &boxCenterA, const std::vector<glm::vec3> &boxVerticesB, const glm::vec3 &boxCenterB);
+
 };
 
 #endif

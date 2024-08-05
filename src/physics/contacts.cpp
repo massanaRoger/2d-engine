@@ -1,8 +1,13 @@
+#include <cmath>
 
 #include "glm/vec3.hpp"
 #include "glm/detail/func_geometric.inl"
 #include "glm/gtx/norm.inl"
 #include "contacts.h"
+
+
+// Value to account for floating point innacuracies
+static constexpr float inaccuracyCheck = 0.0005f;
 
 ContactInfo pointSegmentDistance(const glm::vec3 &p, const glm::vec3 &a, const glm::vec3 &b) {
     glm::vec3 ab = b - a;
@@ -46,6 +51,55 @@ glm::vec3 contactPointCirclevsBox(const glm::vec3 &circleCenter, const std::vect
         }
     }
     return contactPoint;
+}
+
+ContactPoints contactPointsBoxBox(const std::vector<glm::vec3> &verticesA, const std::vector<glm::vec3> &verticesB) {
+    ContactPoints result {};
+    float minDistSq = std::numeric_limits<float>::max();
+
+    for (int i = 0; i < verticesA.size(); i++) {
+        glm::vec3 p = verticesA[i];
+
+        for (int j = 0; j < verticesB.size(); j++) {
+            glm::vec3 va = verticesB[j];
+            glm::vec3 vb = verticesB[(j + 1) % verticesB.size()];
+
+            ContactInfo contactInfo = pointSegmentDistance(p, va, vb);
+            if (std::abs(glm::length(contactInfo.distanceSquared - minDistSq)) < inaccuracyCheck) {
+                if (std::abs(glm::length(contactInfo.contact - result.contact1)) > inaccuracyCheck) {
+                    result.contact2 = contactInfo.contact;
+                    result.nContacts = 2;
+                }
+            } else if (contactInfo.distanceSquared < minDistSq) {
+                minDistSq = contactInfo.distanceSquared;
+                result.nContacts = 1;
+                result.contact1 = contactInfo.contact;
+            }
+        }
+    }
+
+    for (int i = 0; i < verticesB.size(); i++) {
+        glm::vec3 p = verticesB[i];
+
+        for (int j = 0; j < verticesA.size(); j++) {
+            glm::vec3 va = verticesA[j];
+            glm::vec3 vb = verticesA[(j + 1) % verticesA.size()];
+
+            ContactInfo contactInfo = pointSegmentDistance(p, va, vb);
+            if (std::abs(glm::length(contactInfo.distanceSquared - minDistSq)) < inaccuracyCheck) {
+                if (std::abs(glm::length(contactInfo.contact - result.contact1)) > inaccuracyCheck) {
+                    result.contact2 = contactInfo.contact;
+                    result.nContacts = 2;
+                }
+            } else if (contactInfo.distanceSquared < minDistSq) {
+                minDistSq = contactInfo.distanceSquared;
+                result.nContacts = 1;
+                result.contact1 = contactInfo.contact;
+            }
+        }
+    }
+
+    return result;
 }
 
 glm::vec3 contactPointCircleCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB) {

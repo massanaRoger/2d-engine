@@ -16,9 +16,9 @@ public:
                                          const Circle &circle2);
   static void resolveCollisionCircleCircle(Circle &circle1, Circle &circle2);
   static bool checkCollisionAABBCircle(const AABB &aabb, const Circle &circle);
-    static void resolveCollisionBoxCircle(const Manifold &m, const glm::vec3 &boxCenter,
-  glm::vec3 &boxLinearVelocity, float &boxAngularVelocity, float boxInvInertia, float boxInvMass,
-  glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float &circleAngularVelocity, float circleInverseMass, float circleInverseInertia);
+  static void resolveRotationalCollision(const Manifold &m, const glm::vec3 &boxCenter,
+      glm::vec3 &boxLinearVelocity, float &boxAngularVelocity, float boxInvInertia, float boxInvMass,
+      glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float &circleAngularVelocity, float circleInverseMass, float circleInverseInertia);
 
   static void positionalCorrection(Circle &circle1, Circle &circle2);
   static bool checkCollisionPolygonPolygon(const Polygon &p1,
