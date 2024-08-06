@@ -7,9 +7,9 @@
 
 class PhysicsEngine {
 public:
-  static void resolveRotationalCollision(const Manifold &m, const glm::vec3 &boxCenter,
-      glm::vec3 &boxLinearVelocity, float &boxAngularVelocity, float boxInvInertia, float boxInvMass,
-      glm::vec3 &circleCenter, glm::vec3 &circleVelocity, float &circleAngularVelocity, float circleInverseMass, float circleInverseInertia);
+    static void resolveRotationalCollision(const Manifold &m, const glm::vec3 &boxCenter1,
+    glm::vec3 &boxLinearVelocity1, float &boxAngularVelocity1, float boxInvInertia1, float boxInvMass1,
+    glm::vec3 &boxCenter2, glm::vec3 &boxLinearVelocity2, float &boxAngularVelocity2, float boxInverseMass2, float boxInverseInertia2);
 
   static float calculateMomentOfInertia(const glm::vec3 &min, const glm::vec3 &max, float mass);
 

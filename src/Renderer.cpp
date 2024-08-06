@@ -89,6 +89,7 @@ void Renderer::update(float deltaTime) {
         auto angularAccelerationComponent = m_scene.Get<AngularAccelerationComponent>(ent);
 
         centerOfMassComponent->centerOfMass += velocityComponent->velocity * deltaTime;
+        orientationComponent->orientation += angularVelocityComponent->angularVelocity * deltaTime;
 
         float dampingDelta = std::pow(damping, deltaTime);
 
@@ -98,7 +99,6 @@ void Renderer::update(float deltaTime) {
 
         angularVelocityComponent->angularVelocity = angularVelocityComponent->angularVelocity * dampingDelta + angularAccelerationComponent->angularAcceleration * deltaTime;
 
-        orientationComponent->orientation += angularVelocityComponent->angularVelocity * deltaTime;
         Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
     }
 
@@ -127,8 +127,9 @@ void Renderer::update(float deltaTime) {
             std::vector<glm::vec3> boxVertices = Transformations::getWorldVertices(boxComp->vertices, transfComp->transformMatrix);
             if (m.CirclevsBox(cPos->centerOfMass, circleComp->radius, boxVertices, boxCenter->centerOfMass)) {
                 m.ApplyPositionalCorrection(cPos->centerOfMass, boxCenter->centerOfMass, cMass->inverseMass, boxMass->inverseMass);
-                PhysicsEngine::resolveRotationalCollision(m,  cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cMass->inverseMass, cInvInertia->invInertia, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxInverseInertia->invInertia,
-                    boxMass->inverseMass);
+                PhysicsEngine::resolveRotationalCollision(m,  cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cInvInertia->invInertia, cMass->inverseMass, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxMass->inverseMass,
+                    boxInverseInertia->invInertia);
+
             }
         }
     }
@@ -165,6 +166,7 @@ void Renderer::update(float deltaTime) {
                 m.ApplyPositionalCorrection(boxCenter1->centerOfMass, boxCenter2->centerOfMass, boxMass1->inverseMass, boxMass2->inverseMass);
                 PhysicsEngine::resolveRotationalCollision(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
                     boxMass1->inverseMass, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity, boxMass2->inverseMass, boxInverseInertia2->invInertia);
+
             }
         }
     }
@@ -244,12 +246,12 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
 
     centerOfMassComponent->centerOfMass = glm::vec3(centerX, centerY, 0.0f);
     velocityComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-    massComponent->inverseMass = 1.0f;
+    massComponent->inverseMass = 1.0f / 8.0f;
     accelerationComponent->acceleration = glm::vec3(0.0f, -5.0f, 0.0f);
     circleComponent->radius = radius;
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;
-    inertiaComponent->invInertia = 1.0f;
+    inertiaComponent->invInertia = 1 / (Transformations::calculateCircleInertia(1.0f / massComponent->inverseMass, radius) * 10);
 
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
@@ -305,7 +307,7 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
 
     boxComponent->vertices = createBoxVertices(width, height);
 
-    massComponent->inverseMass = 1.0f;
+    massComponent->inverseMass = 1.0f / 10.0f;
     centerOfMassComponent->centerOfMass = position;
 
     velocityComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -313,9 +315,10 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
 
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;
-    inertiaComponent->invInertia = 1.0f;
+    inertiaComponent->invInertia = 1 / (Transformations::calculateBoxInertia(1.0f / massComponent->inverseMass, width, height) * 10);
 
-    // inertiaComponent->inertia = PhysicsEngine::calculateMomentOfInertia(min, max, 1.0f / massComponent->inverseMass);
+    // inertiaComponent->invInertia = 1 / Transformations::calculateBoxInertia(1.0f / massComponent->inverseMass, width, height);
+
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);

@@ -13,7 +13,7 @@ void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec
   glm::vec3 &boxCenter2, glm::vec3 &boxLinearVelocity2, float &boxAngularVelocity2, float boxInverseMass2, float boxInverseInertia2) {
 
   // Todo: calculate minimum restitution between the box and circle, for the moment we assume arbitrary value
-  float e = 0.7f;
+  float e = 0.8f;
 
   std::vector<glm::vec3> contactList{};
   assert(m.nContacts == 1 || m.nContacts == 2);
@@ -34,8 +34,8 @@ void PhysicsEngine::resolveRotationalCollision(const Manifold &m, const glm::vec
     raList[i] = ra;
     rbList[i] = rb;
 
-    glm::vec3 raPerp(ra.y, -ra.x, 0.0f);
-    glm::vec3 rbPerp(rb.y, -rb.x, 0.0f);
+    glm::vec3 raPerp(-ra.y, ra.x, 0.0f);
+    glm::vec3 rbPerp(-rb.y, rb.x, 0.0f);
 
     glm::vec3 angularLinearVelocityA = raPerp * boxAngularVelocity1;
     glm::vec3 angularLinearVelocityB = rbPerp * boxAngularVelocity2;

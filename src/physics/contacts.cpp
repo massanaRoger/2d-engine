@@ -7,7 +7,7 @@
 
 
 // Value to account for floating point innacuracies
-static constexpr float inaccuracyCheck = 0.0005f;
+static constexpr float inaccuracyCheck = 0.000005f;
 
 ContactInfo pointSegmentDistance(const glm::vec3 &p, const glm::vec3 &a, const glm::vec3 &b) {
     glm::vec3 ab = b - a;

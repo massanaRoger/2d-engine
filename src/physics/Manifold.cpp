@@ -7,7 +7,7 @@
 #include "glm/gtx/norm.hpp"
 
 void Manifold::ApplyPositionalCorrection(glm::vec3& positionA, glm::vec3& positionB, float invMassA, float invMassB) const {
-    const float percent = 0.8f;
+    const float percent = 0.2f;
     const float slop = 0.01f;
     float totalInvMass = invMassA + invMassB;
     glm::vec3 correction = std::max(penetration - slop, 0.0f) / totalInvMass * percent * normal;
@@ -25,7 +25,6 @@ bool Manifold::CirclevsCircle(const glm::vec3 &centerA, float radiusA, const glm
     float d = glm::length(ab);
     penetration = r - d;
     normal = ab / d;
-
     if (glm::dot(ab, normal) < 0.0f) {
         normal = -normal;
     }
