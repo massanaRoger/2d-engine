@@ -63,3 +63,7 @@ struct FrictionComponent {
 };
 
 struct MovingComponent {};
+
+struct ColorComponent {
+    glm::vec3 color;
+};

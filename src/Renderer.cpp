@@ -1,11 +1,8 @@
 #include "Renderer.h"
 
 #include <iostream>
-#include <memory>
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "Scene.h"
@@ -33,7 +30,7 @@ void Renderer::draw(Shader &shader) {
         1, 2, 3    // second triangle
     };
 
-    for (EntityID ent : SceneView<CenterOfMassComponent, CircleComponent, TransformComponent>(&m_scene)) {
+    for (EntityID ent : SceneView<CenterOfMassComponent, CircleComponent, TransformComponent, ColorComponent>(&m_scene)) {
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
@@ -42,21 +39,24 @@ void Renderer::draw(Shader &shader) {
         auto centerOfMassComponent = m_scene.Get<CenterOfMassComponent>(ent);
         auto circleComponent = m_scene.Get<CircleComponent>(ent);
         auto transformComponent = m_scene.Get<TransformComponent>(ent);
+        auto colorComponent = m_scene.Get<ColorComponent>(ent);
 
         GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformComponent->transformMatrix));
 
         shader.setVec2("u_center", centerOfMassComponent->centerOfMass.x, centerOfMassComponent->centerOfMass.y);
+        shader.setVec3("u_color", colorComponent->color);
         shader.setFloat("u_radius", circleComponent->radius);
-        shader.setInt("u_objType", 1);
+        shader.setInt("u_objType", 0);
 
         glBindVertexArray(m_VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     }
 
-    for (EntityID ent : SceneView<BoxComponent, TransformComponent>(&m_scene)) {
-        auto *boxComponent = m_scene.Get<BoxComponent>(ent);
-        auto *transformComponent = m_scene.Get<TransformComponent>(ent);
+    for (EntityID ent : SceneView<BoxComponent, TransformComponent, ColorComponent>(&m_scene)) {
+        auto boxComponent = m_scene.Get<BoxComponent>(ent);
+        auto transformComponent = m_scene.Get<TransformComponent>(ent);
+        auto colorComponent = m_scene.Get<ColorComponent>(ent);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         glBufferData(GL_ARRAY_BUFFER, boxComponent->vertices.size() * sizeof(glm::vec3), boxComponent->vertices.data(), GL_STATIC_DRAW);
@@ -64,7 +64,8 @@ void Renderer::draw(Shader &shader) {
         GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformComponent->transformMatrix));
 
-        shader.setInt("u_objType", 2);
+        shader.setInt("u_objType", 1);
+        shader.setVec3("u_color", colorComponent->color);
 
         glBindVertexArray(m_VAO);
         glDrawArrays(GL_TRIANGLE_FAN, 0, boxComponent->vertices.size());
@@ -132,10 +133,6 @@ void Renderer::update(float deltaTime) {
                 PhysicsEngine::resolveRotationalCollisionWithFriction(m, cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cInvInertia->invInertia,
                cMass->inverseMass, cFriction->staticFriction, cFriction->dynamicFriction, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity,
                boxMass->inverseMass, boxInverseInertia->invInertia, boxFriction->staticFriction, boxFriction->dynamicFriction);
-
-                //PhysicsEngine::resolveRotationalCollision(m,  cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cInvInertia->invInertia, cMass->inverseMass, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxMass->inverseMass,
-                //    boxInverseInertia->invInertia);
-
             }
         }
     }
@@ -176,10 +173,6 @@ void Renderer::update(float deltaTime) {
                 PhysicsEngine::resolveRotationalCollisionWithFriction(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
                    boxMass1->inverseMass, boxFriction1->staticFriction, boxFriction1->dynamicFriction, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity,
                    boxMass2->inverseMass, boxInverseInertia2->invInertia, boxFriction2->staticFriction, boxFriction2->dynamicFriction);
-
-                //PhysicsEngine::resolveRotationalCollision(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
-                //   boxMass1->inverseMass, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity, boxMass2->inverseMass, boxInverseInertia2->invInertia);
-
             }
         }
     }
@@ -214,8 +207,6 @@ void Renderer::update(float deltaTime) {
                 PhysicsEngine::resolveRotationalCollisionWithFriction(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
                    cMass1->inverseMass, cFriction1->staticFriction, cFriction1->dynamicFriction, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity,
                    cMass2->inverseMass, cInertia2->invInertia, cFriction2->staticFriction, cFriction2->dynamicFriction);
-                // PhysicsEngine::resolveRotationalCollision(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
-                //   cMass1->inverseMass, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity, cMass2->inverseMass, cInertia2->invInertia);
             }
         }
     }
@@ -248,8 +239,10 @@ Renderer::Renderer(): m_VAO(-1), m_VBO(-1), m_EBO(-1), m_scene() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void Renderer::insertCircle(float centerX, float centerY, float radius) {
+void Renderer::insertCircle(float centerX, float centerY, float radius, const glm::vec3 &color) {
     EntityID circle = m_scene.NewEntity();
+
+    // Positional and physics components
     auto centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(circle);
     auto velocityComponent = m_scene.Assign<VelocityComponent>(circle);
     auto accelerationComponent = m_scene.Assign<AccelerationComponent>(circle);
@@ -262,6 +255,9 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
     auto transformComponent = m_scene.Assign<TransformComponent>(circle);
     auto frictionComponent = m_scene.Assign<FrictionComponent>(circle);
     m_scene.Assign<MovingComponent>(circle);
+
+    // Draw components
+    auto colorComponent = m_scene.Assign<ColorComponent>(circle);
 
     centerOfMassComponent->centerOfMass = glm::vec3(centerX, centerY, 0.0f);
     velocityComponent->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -278,22 +274,27 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
 
+    colorComponent->color = color;
+
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
 
-void Renderer::insertStaticBox(const glm::vec3& position, float width, float height) {
+void Renderer::insertStaticBox(const glm::vec3& position, float width, float height, const glm::vec3 &color) {
     EntityID box = m_scene.NewEntity();
-    auto *boxComponent = m_scene.Assign<BoxComponent>(box);
-    auto *massComponent = m_scene.Assign<MassComponent>(box);
-    auto *centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(box);
-    auto *velocityComponent = m_scene.Assign<VelocityComponent>(box);
-    auto *accelerationComponent = m_scene.Assign<AccelerationComponent>(box);
-    auto *avComponent = m_scene.Assign<AngularVelocityComponent>(box);
-    auto *aaComponent = m_scene.Assign<AngularAccelerationComponent>(box);
-    auto *inertiaComponent = m_scene.Assign<InertiaComponent>(box);
-    auto *orientationComponent = m_scene.Assign<OrientationComponent>(box);
-    auto *transformComponent = m_scene.Assign<TransformComponent>(box);
+    auto boxComponent = m_scene.Assign<BoxComponent>(box);
+    auto massComponent = m_scene.Assign<MassComponent>(box);
+    auto centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(box);
+    auto velocityComponent = m_scene.Assign<VelocityComponent>(box);
+    auto accelerationComponent = m_scene.Assign<AccelerationComponent>(box);
+    auto avComponent = m_scene.Assign<AngularVelocityComponent>(box);
+    auto aaComponent = m_scene.Assign<AngularAccelerationComponent>(box);
+    auto inertiaComponent = m_scene.Assign<InertiaComponent>(box);
+    auto orientationComponent = m_scene.Assign<OrientationComponent>(box);
+    auto transformComponent = m_scene.Assign<TransformComponent>(box);
     auto frictionComponent = m_scene.Assign<FrictionComponent>(box);
+
+    // Draw components
+    auto colorComponent = m_scene.Assign<ColorComponent>(box);
 
     boxComponent->vertices = createBoxVertices(width, height);
 
@@ -314,24 +315,29 @@ void Renderer::insertStaticBox(const glm::vec3& position, float width, float hei
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
 
+    colorComponent->color = color;
+
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
 
-void Renderer::insertBox(const glm::vec3& position, float width, float height) {
+void Renderer::insertBox(const glm::vec3& position, float width, float height, const glm::vec3 &color) {
     EntityID box = m_scene.NewEntity();
-    auto *boxComponent = m_scene.Assign<BoxComponent>(box);
-    auto *massComponent = m_scene.Assign<MassComponent>(box);
-    auto *centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(box);
-    auto *velocityComponent = m_scene.Assign<VelocityComponent>(box);
-    auto *accelerationComponent = m_scene.Assign<AccelerationComponent>(box);
-    auto *avComponent = m_scene.Assign<AngularVelocityComponent>(box);
-    auto *aaComponent = m_scene.Assign<AngularAccelerationComponent>(box);
-    auto *inertiaComponent = m_scene.Assign<InertiaComponent>(box);
-    auto *orientationComponent = m_scene.Assign<OrientationComponent>(box);
-    auto *transformComponent = m_scene.Assign<TransformComponent>(box);
+    auto boxComponent = m_scene.Assign<BoxComponent>(box);
+    auto massComponent = m_scene.Assign<MassComponent>(box);
+    auto centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(box);
+    auto velocityComponent = m_scene.Assign<VelocityComponent>(box);
+    auto accelerationComponent = m_scene.Assign<AccelerationComponent>(box);
+    auto avComponent = m_scene.Assign<AngularVelocityComponent>(box);
+    auto aaComponent = m_scene.Assign<AngularAccelerationComponent>(box);
+    auto inertiaComponent = m_scene.Assign<InertiaComponent>(box);
+    auto orientationComponent = m_scene.Assign<OrientationComponent>(box);
+    auto transformComponent = m_scene.Assign<TransformComponent>(box);
     auto frictionComponent = m_scene.Assign<FrictionComponent>(box);
 
     m_scene.Assign<MovingComponent>(box);
+
+    // Draw components
+    auto colorComponent = m_scene.Assign<ColorComponent>(box);
 
     boxComponent->vertices = createBoxVertices(width, height);
 
@@ -351,6 +357,9 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
 
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
+
+    colorComponent->color = color;
+
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
 

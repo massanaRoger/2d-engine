@@ -85,14 +85,18 @@ void Shader::use() {
     glUseProgram(programID);
 }
 
-void Shader::setVec2(const char* name, float width, float height) {
+void Shader::setVec2(const char* name, float width, float height) const {
     glUniform2f(glGetUniformLocation(programID, name), width, height);
 }
 
-void Shader::setFloat(const char* name, float x) {
+void Shader::setVec3(const char* name, const glm::vec3 &vec) const {
+    glUniform3f(glGetUniformLocation(programID, name), vec.x, vec.y, vec.z);
+}
+
+void Shader::setFloat(const char* name, float x) const {
     glUniform1f(glGetUniformLocation(programID, name), x);
 }
 
-void Shader::setInt(const char* name, int x) {
+void Shader::setInt(const char* name, int x) const {
     glUniform1i(glGetUniformLocation(programID, name), x);
 }

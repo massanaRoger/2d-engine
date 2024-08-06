@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
         src/component.cpp
         src/physics/contacts.cpp
         src/physics/Transformations.cpp
+        src/gui/GUIManager.cpp
 )
 
 # Define the current working directory as a macro

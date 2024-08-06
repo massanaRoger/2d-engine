@@ -4,12 +4,17 @@
 #include <iostream>
 #include <memory>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include "Renderer.h"
 #include "Scene.h"
 #include "components/Components.h"
 #include "physics/PhysicsEngine.h"
 #include "shader/Shader.h"
 #include "utils.h"
+#include "gui/GUIManager.h"
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -23,6 +28,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 std::unique_ptr<Renderer> renderer;
+std::unique_ptr<GUIManager> guiManager;
 bool isPointerCursor = false;
 GLFWcursor *pointerCursor = nullptr;
 std::vector<glm::vec3> polygonToInsert;
@@ -59,16 +65,37 @@ int main() {
                          getFullPath("shaders/fragment_shader.glsl"));
 
   renderer = std::make_unique<Renderer>();
+  guiManager = std::make_unique<GUIManager>();
+
   float width = 1.8f;
   float height = 0.1f;
-  renderer->insertStaticBox(glm::vec3(0.0f, -0.8f, 0.0f), width, height);
+  renderer->insertStaticBox(glm::vec3(0.0f, -0.8f, 0.0f), width, height, guiManager->GetSelectedColor());
 
   glViewport(0, 0, 800, 800);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetKeyCallback(window, keyCallback);
 
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+  ImGui_ImplOpenGL3_Init();
+
   while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    guiManager->Render();
+
     processInput(window);
 
     double currentFrame = glfwGetTime();
@@ -84,11 +111,15 @@ int main() {
 
     renderer->draw(shader);
 
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
-    glfwPollEvents();
   }
 
   glfwTerminate();
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
   return 0;
 }
 
@@ -131,7 +162,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
 
     float radius = 0.05f;
-    renderer->insertCircle(ndcX, ndcY, radius);
+    renderer->insertCircle(ndcX, ndcY, radius, guiManager->GetSelectedColor());
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS &&
       isPointerCursor) {
@@ -150,7 +181,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
     float width = 0.1f;
     float height = 0.1f;
-    renderer->insertBox(glm::vec3(ndcX, ndcY, 0.0f), width, height);
+    renderer->insertBox(glm::vec3(ndcX, ndcY, 0.0f), width, height, guiManager->GetSelectedColor());
   }
 }
 

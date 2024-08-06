@@ -11,9 +11,9 @@ public:
     ~Renderer();
     void draw(Shader &shader);
 
-    void insertCircle(float centerX, float centerY, float radius);
-    void insertBox(const glm::vec3& position, float width, float height);
-    void insertStaticBox(const glm::vec3& position, float width, float height);
+    void insertCircle(float centerX, float centerY, float radius, const glm::vec3 &color);
+    void insertBox(const glm::vec3& position, float width, float height, const glm::vec3 &color);
+    void insertStaticBox(const glm::vec3& position, float width, float height, const glm::vec3 &color);
     void update(float deltaTime);
 private:
     Scene m_scene;
