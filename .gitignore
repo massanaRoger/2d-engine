@@ -2,3 +2,4 @@
 cmake-build-debug
 vendor
 build
+/cmake-build-debug-visual-studio/

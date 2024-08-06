@@ -1,0 +1,17 @@
+{
+  "name": "engine",
+  "version-string": "1.0",
+  "dependencies": [
+    "glfw3",
+    "glad",
+    "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental",
+        "opengl3-binding",
+        "glfw-binding"
+      ]
+    }
+  ]
+}
