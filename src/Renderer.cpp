@@ -75,7 +75,7 @@ void Renderer::draw(Shader &shader) {
 }
 
 void Renderer::update(float deltaTime) {
-    float damping = 0.3f;
+    float damping = 0.8f;
 
     for (EntityID ent : SceneView<VelocityComponent, AccelerationComponent, CenterOfMassComponent,
         AngularAccelerationComponent, InertiaComponent, OrientationComponent, TransformComponent, MovingComponent>(&m_scene)) {
@@ -103,15 +103,16 @@ void Renderer::update(float deltaTime) {
     }
 
     // Check collision circle box
-    for (EntityID cEntity : SceneView<VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent, CenterOfMassComponent>(&m_scene)) {
+    for (EntityID cEntity : SceneView<VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent, CenterOfMassComponent, FrictionComponent>(&m_scene)) {
         auto circleComp = m_scene.Get<CircleComponent>(cEntity);
         auto cPos = m_scene.Get<CenterOfMassComponent>(cEntity);
         auto cVel = m_scene.Get<VelocityComponent>(cEntity);
         auto cMass = m_scene.Get<MassComponent>(cEntity);
         auto cAngVel = m_scene.Get<AngularVelocityComponent>(cEntity);
         auto cInvInertia = m_scene.Get<InertiaComponent>(cEntity);
+        auto cFriction = m_scene.Get<FrictionComponent>(cEntity);
 
-        for (EntityID boxEntity : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
+        for (EntityID boxEntity : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent, FrictionComponent>(&m_scene)) {
             // Can't be a boxEntity and circleEntity at the same time
             assert(boxEntity != cEntity);
 
@@ -122,20 +123,25 @@ void Renderer::update(float deltaTime) {
             auto boxVelocity = m_scene.Get<VelocityComponent>(boxEntity);
             auto boxAngularVelocity = m_scene.Get<AngularVelocityComponent>(boxEntity);
             auto boxInverseInertia = m_scene.Get<InertiaComponent>(boxEntity);
+            auto boxFriction = m_scene.Get<FrictionComponent>(boxEntity);
 
             Manifold m{};
             std::vector<glm::vec3> boxVertices = Transformations::getWorldVertices(boxComp->vertices, transfComp->transformMatrix);
             if (m.CirclevsBox(cPos->centerOfMass, circleComp->radius, boxVertices, boxCenter->centerOfMass)) {
                 m.ApplyPositionalCorrection(cPos->centerOfMass, boxCenter->centerOfMass, cMass->inverseMass, boxMass->inverseMass);
-                PhysicsEngine::resolveRotationalCollision(m,  cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cInvInertia->invInertia, cMass->inverseMass, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxMass->inverseMass,
-                    boxInverseInertia->invInertia);
+                PhysicsEngine::resolveRotationalCollisionWithFriction(m, cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cInvInertia->invInertia,
+               cMass->inverseMass, cFriction->staticFriction, cFriction->dynamicFriction, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity,
+               boxMass->inverseMass, boxInverseInertia->invInertia, boxFriction->staticFriction, boxFriction->dynamicFriction);
+
+                //PhysicsEngine::resolveRotationalCollision(m,  cPos->centerOfMass, cVel->velocity, cAngVel->angularVelocity, cInvInertia->invInertia, cMass->inverseMass, boxCenter->centerOfMass, boxVelocity->velocity, boxAngularVelocity->angularVelocity, boxMass->inverseMass,
+                //    boxInverseInertia->invInertia);
 
             }
         }
     }
 
     // Check collisions box box
-    for (EntityID e1 : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
+    for (EntityID e1 : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent, FrictionComponent>(&m_scene)) {
         auto boxComp1 = m_scene.Get<BoxComponent>(e1);
         auto transfComp1 = m_scene.Get<TransformComponent>(e1);
         auto boxMass1 = m_scene.Get<MassComponent>(e1);
@@ -143,8 +149,9 @@ void Renderer::update(float deltaTime) {
         auto boxVelocity1 = m_scene.Get<VelocityComponent>(e1);
         auto boxAngularVelocity1 = m_scene.Get<AngularVelocityComponent>(e1);
         auto boxInverseInertia1 = m_scene.Get<InertiaComponent>(e1);
+        auto boxFriction1 = m_scene.Get<FrictionComponent>(e1);
 
-        for (EntityID e2 : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
+        for (EntityID e2 : SceneView<BoxComponent, MassComponent, VelocityComponent, CenterOfMassComponent, TransformComponent, AngularVelocityComponent, InertiaComponent, FrictionComponent>(&m_scene)) {
             // Don't compare to itself
             if (e1 == e2) {
                 continue;
@@ -157,6 +164,7 @@ void Renderer::update(float deltaTime) {
             auto boxVelocity2 = m_scene.Get<VelocityComponent>(e2);
             auto boxAngularVelocity2 = m_scene.Get<AngularVelocityComponent>(e2);
             auto boxInverseInertia2 = m_scene.Get<InertiaComponent>(e2);
+            auto boxFriction2 = m_scene.Get<FrictionComponent>(e2);
 
             Manifold m{};
             std::vector<glm::vec3> boxVertices1 = Transformations::getWorldVertices(boxComp1->vertices, transfComp1->transformMatrix);
@@ -164,23 +172,29 @@ void Renderer::update(float deltaTime) {
 
             if (m.BoxvsBox(boxVertices1, boxCenter1->centerOfMass, boxVertices2, boxCenter2->centerOfMass)) {
                 m.ApplyPositionalCorrection(boxCenter1->centerOfMass, boxCenter2->centerOfMass, boxMass1->inverseMass, boxMass2->inverseMass);
-                PhysicsEngine::resolveRotationalCollision(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
-                    boxMass1->inverseMass, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity, boxMass2->inverseMass, boxInverseInertia2->invInertia);
+
+                PhysicsEngine::resolveRotationalCollisionWithFriction(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
+                   boxMass1->inverseMass, boxFriction1->staticFriction, boxFriction1->dynamicFriction, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity,
+                   boxMass2->inverseMass, boxInverseInertia2->invInertia, boxFriction2->staticFriction, boxFriction2->dynamicFriction);
+
+                //PhysicsEngine::resolveRotationalCollision(m, boxCenter1->centerOfMass, boxVelocity1->velocity, boxAngularVelocity1->angularVelocity, boxInverseInertia1->invInertia,
+                //   boxMass1->inverseMass, boxCenter2->centerOfMass, boxVelocity2->velocity, boxAngularVelocity2->angularVelocity, boxMass2->inverseMass, boxInverseInertia2->invInertia);
 
             }
         }
     }
 
     // Check for collision with circle circle
-    for (EntityID e1 : SceneView<CenterOfMassComponent, VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
+    for (EntityID e1 : SceneView<CenterOfMassComponent, VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent, FrictionComponent>(&m_scene)) {
         auto circleComp1 = m_scene.Get<CircleComponent>(e1);
         auto cPos1 = m_scene.Get<CenterOfMassComponent>(e1);
         auto cVel1 = m_scene.Get<VelocityComponent>(e1);
         auto cMass1 = m_scene.Get<MassComponent>(e1);
         auto cAng1 = m_scene.Get<AngularVelocityComponent>(e1);
         auto cInertia1 = m_scene.Get<InertiaComponent>(e1);
+        auto cFriction1 = m_scene.Get<FrictionComponent>(e1);
 
-        for (EntityID e2 : SceneView<CenterOfMassComponent, VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent>(&m_scene)) {
+        for (EntityID e2 : SceneView<CenterOfMassComponent, VelocityComponent, CircleComponent, MassComponent, AngularVelocityComponent, InertiaComponent, FrictionComponent>(&m_scene)) {
             // If we are testing the same circle we do nothing
             if (e1 == e2) {
                 continue;
@@ -191,13 +205,17 @@ void Renderer::update(float deltaTime) {
             auto cMass2 = m_scene.Get<MassComponent>(e2);
             auto cAng2 = m_scene.Get<AngularVelocityComponent>(e2);
             auto cInertia2 = m_scene.Get<InertiaComponent>(e2);
+            auto cFriction2 = m_scene.Get<FrictionComponent>(e2);
 
             Manifold m{};
 
             if (m.CirclevsCircle(cPos1->centerOfMass, circleComp1->radius, cPos2->centerOfMass, circleComp2->radius)) {
                 m.ApplyPositionalCorrection(cPos1->centerOfMass, cPos2->centerOfMass, cMass1->inverseMass, cMass2->inverseMass);
-                PhysicsEngine::resolveRotationalCollision(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
-                    cMass1->inverseMass, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity, cMass2->inverseMass, cInertia2->invInertia);
+                PhysicsEngine::resolveRotationalCollisionWithFriction(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
+                   cMass1->inverseMass, cFriction1->staticFriction, cFriction1->dynamicFriction, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity,
+                   cMass2->inverseMass, cInertia2->invInertia, cFriction2->staticFriction, cFriction2->dynamicFriction);
+                // PhysicsEngine::resolveRotationalCollision(m, cPos1->centerOfMass, cVel1->velocity, cAng1->angularVelocity, cInertia1->invInertia,
+                //   cMass1->inverseMass, cPos2->centerOfMass, cVel2->velocity, cAng2->angularVelocity, cMass2->inverseMass, cInertia2->invInertia);
             }
         }
     }
@@ -242,6 +260,7 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
     auto inertiaComponent = m_scene.Assign<InertiaComponent>(circle);
     auto orientationComponent = m_scene.Assign<OrientationComponent>(circle);
     auto transformComponent = m_scene.Assign<TransformComponent>(circle);
+    auto frictionComponent = m_scene.Assign<FrictionComponent>(circle);
     m_scene.Assign<MovingComponent>(circle);
 
     centerOfMassComponent->centerOfMass = glm::vec3(centerX, centerY, 0.0f);
@@ -252,6 +271,9 @@ void Renderer::insertCircle(float centerX, float centerY, float radius) {
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;
     inertiaComponent->invInertia = 1 / (Transformations::calculateCircleInertia(1.0f / massComponent->inverseMass, radius) * 10);
+
+    frictionComponent->staticFriction = 0.6f;
+    frictionComponent->dynamicFriction = 0.4f;
 
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
@@ -271,6 +293,7 @@ void Renderer::insertStaticBox(const glm::vec3& position, float width, float hei
     auto *inertiaComponent = m_scene.Assign<InertiaComponent>(box);
     auto *orientationComponent = m_scene.Assign<OrientationComponent>(box);
     auto *transformComponent = m_scene.Assign<TransformComponent>(box);
+    auto frictionComponent = m_scene.Assign<FrictionComponent>(box);
 
     boxComponent->vertices = createBoxVertices(width, height);
 
@@ -284,6 +307,9 @@ void Renderer::insertStaticBox(const glm::vec3& position, float width, float hei
     avComponent->angularVelocity = 0.0f;
     aaComponent->angularAcceleration = 0.0f;
     inertiaComponent->invInertia = 0.0f;
+
+    frictionComponent->staticFriction = 0.6f;
+    frictionComponent->dynamicFriction = 0.4f;
 
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);
@@ -303,6 +329,8 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
     auto *inertiaComponent = m_scene.Assign<InertiaComponent>(box);
     auto *orientationComponent = m_scene.Assign<OrientationComponent>(box);
     auto *transformComponent = m_scene.Assign<TransformComponent>(box);
+    auto frictionComponent = m_scene.Assign<FrictionComponent>(box);
+
     m_scene.Assign<MovingComponent>(box);
 
     boxComponent->vertices = createBoxVertices(width, height);
@@ -318,6 +346,8 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height) {
     inertiaComponent->invInertia = 1 / (Transformations::calculateBoxInertia(1.0f / massComponent->inverseMass, width, height) * 10);
 
     // inertiaComponent->invInertia = 1 / Transformations::calculateBoxInertia(1.0f / massComponent->inverseMass, width, height);
+    frictionComponent->staticFriction = 0.8f;
+    frictionComponent->dynamicFriction = 0.6f;
 
     orientationComponent->orientation = 0.0f;
     transformComponent->transformMatrix = glm::mat4(1.0f);

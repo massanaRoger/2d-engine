@@ -126,3 +126,7 @@ int findClosestPointOnPolygon(const glm::vec3 &circleCenter, const std::vector<g
 
     return result;
 }
+
+bool nearlyEqual(const glm::vec3 &v1, const glm::vec3 &v2) {
+    return std::abs(glm::length(v1 - v2)) < inaccuracyCheck;
+}

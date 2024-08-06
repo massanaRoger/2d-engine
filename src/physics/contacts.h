@@ -19,3 +19,4 @@ glm::vec3 contactPointCirclevsBox(const glm::vec3 &circleCenter, const std::vect
 int findClosestPointOnPolygon(const glm::vec3 &circleCenter, const std::vector<glm::vec3> &vertices);
 glm::vec3 contactPointCircleCircle(const glm::vec3 &centerA, float radiusA, const glm::vec3 &centerB);
 ContactPoints contactPointsBoxBox(const std::vector<glm::vec3> &verticesA, const std::vector<glm::vec3> &verticesB);
+bool nearlyEqual(const glm::vec3 &v1, const glm::vec3 &v2);

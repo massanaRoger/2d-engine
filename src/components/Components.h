@@ -57,4 +57,9 @@ struct TransformComponent {
     glm::mat4 transformMatrix;
 };
 
+struct FrictionComponent {
+    float staticFriction;
+    float dynamicFriction;
+};
+
 struct MovingComponent {};
