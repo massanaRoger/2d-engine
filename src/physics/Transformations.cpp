@@ -1,6 +1,7 @@
 #include "Transformations.h"
 
 #include <iostream>
+#include <glm/ext/matrix_clip_space.hpp>
 
 #include "glm/ext/matrix_transform.hpp"
 
@@ -9,6 +10,12 @@ void Transformations::updateMatrix(glm::mat4 &transformationMatrix, const glm::v
     transformationMatrix = glm::translate(transformationMatrix, centerOfMass);
     transformationMatrix = glm::rotate(transformationMatrix, rotation, glm::vec3(0.0, 0.0, 1.0));
 }
+
+glm::mat4 Transformations::createProjectionMatrix(int width, int height) {
+    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    return glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+}
+
 
 std::vector<glm::vec3> Transformations::getWorldVertices(const std::vector<glm::vec3> &localVertices, const glm::mat4 &transformationMatrix) {
     std::vector<glm::vec3> worldVertices;

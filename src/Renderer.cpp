@@ -41,9 +41,7 @@ void Renderer::draw(Shader &shader) {
         auto transformComponent = m_scene.Get<TransformComponent>(ent);
         auto colorComponent = m_scene.Get<ColorComponent>(ent);
 
-        GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformComponent->transformMatrix));
-
+        shader.setMat4("transform", transformComponent->transformMatrix);
         shader.setVec2("u_center", centerOfMassComponent->centerOfMass.x, centerOfMassComponent->centerOfMass.y);
         shader.setVec3("u_color", colorComponent->color);
         shader.setFloat("u_radius", circleComponent->radius);

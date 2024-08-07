@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 Shader::Shader(const std::string& vFilePath, const std::string& fFilePath) {
     std::string vShaderCode;
@@ -99,4 +100,8 @@ void Shader::setFloat(const char* name, float x) const {
 
 void Shader::setInt(const char* name, int x) const {
     glUniform1i(glGetUniformLocation(programID, name), x);
+}
+
+void Shader::setMat4(const char* name, const glm::mat4 &mat) const {
+    glUniformMatrix4fv(glGetUniformLocation(programID, name), 1, GL_FALSE, glm::value_ptr(mat));
 }

@@ -15,6 +15,7 @@
 #include "shader/Shader.h"
 #include "utils.h"
 #include "gui/GUIManager.h"
+#include "physics/Transformations.h"
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -29,6 +30,7 @@ double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 std::unique_ptr<Renderer> renderer;
 std::unique_ptr<GUIManager> guiManager;
+std::unique_ptr<Shader> shader;
 bool isPointerCursor = false;
 GLFWcursor *pointerCursor = nullptr;
 std::vector<glm::vec3> polygonToInsert;
@@ -61,9 +63,10 @@ int main() {
     return -1;
   }
 
-  Shader shader = Shader(getFullPath("shaders/vertex_shader.glsl"),
-                         getFullPath("shaders/fragment_shader.glsl"));
-
+  shader = std::make_unique<Shader>(
+    getFullPath("shaders/vertex_shader.glsl"),
+    getFullPath("shaders/fragment_shader.glsl")
+  );
   renderer = std::make_unique<Renderer>();
   guiManager = std::make_unique<GUIManager>();
 
@@ -104,12 +107,12 @@ int main() {
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    shader.setVec2("u_resolution", (float)width, (float)height);
+    shader->setVec2("u_resolution", (float)width, (float)height);
     renderer->update(deltaTime);
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-    renderer->draw(shader);
+    renderer->draw(*shader);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -125,6 +128,8 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
+  glm::mat4 projection = Transformations::createProjectionMatrix(width, height);
+  shader->setMat4("u_projection", projection);
 }
 
 void processInput(GLFWwindow *window) {
