@@ -15,9 +15,11 @@ public:
     void insertBox(const glm::vec3& position, float width, float height, const glm::vec3 &color);
     void insertStaticBox(const glm::vec3& position, float width, float height, const glm::vec3 &color);
     void update(float deltaTime);
+    void setProjection(const glm::mat4 &projection);
 private:
     Scene m_scene;
     unsigned int m_VBO, m_VAO, m_EBO;
+    glm::mat4 m_projection;
 };
 
 #endif

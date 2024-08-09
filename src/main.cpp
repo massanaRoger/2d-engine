@@ -34,6 +34,7 @@ std::unique_ptr<Shader> shader;
 bool isPointerCursor = false;
 GLFWcursor *pointerCursor = nullptr;
 std::vector<glm::vec3> polygonToInsert;
+glm::mat4 projection;
 
 int main() {
   if (!glfwInit()) {
@@ -69,6 +70,8 @@ int main() {
   );
   renderer = std::make_unique<Renderer>();
   guiManager = std::make_unique<GUIManager>();
+  projection = Transformations::createProjectionMatrix(800, 800);
+  renderer->setProjection(projection);
 
   float width = 1.8f;
   float height = 0.1f;
@@ -107,7 +110,7 @@ int main() {
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    shader->setVec2("u_resolution", (float)width, (float)height);
+    shader->setVec2("u_resolution", static_cast<float>(width), static_cast<float>(height));
     renderer->update(deltaTime);
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -128,8 +131,8 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
-  glm::mat4 projection = Transformations::createProjectionMatrix(width, height);
-  shader->setMat4("u_projection", projection);
+  projection = Transformations::createProjectionMatrix(width, height);
+  renderer->setProjection(projection);
 }
 
 void processInput(GLFWwindow *window) {
@@ -190,11 +193,13 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
   }
 }
 
-void pixelToNDC(GLFWwindow *window, double x, double y, double *ndcX,
-                double *ndcY) {
+void pixelToNDC(GLFWwindow *window, double x, double y, double *ndcX, double *ndcY) {
   int windowWidth, windowHeight;
   glfwGetWindowSize(window, &windowWidth, &windowHeight);
 
-  *ndcX = (2.0 * x) / windowWidth - 1.0;
-  *ndcY = 1.0 - (2.0 * y) / windowHeight;
+  float aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
+
+  // Adjust for aspect ratio
+  *ndcX = ((2.0f * x) / windowWidth - 1.0f) * aspectRatio;
+  *ndcY = 1.0f - (2.0f * y) / windowHeight;
 }

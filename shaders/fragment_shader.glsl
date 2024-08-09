@@ -20,12 +20,8 @@ void main()
     uv.x *= u_resolution.x / u_resolution.y;
 
     if (u_objType == 0) {
-        // Normalize fragment coordinates
-        vec2 normCenter = u_center;
-        normCenter.x *= u_resolution.x / u_resolution.y;
-
         // Calculate the distance from the current fragment to the circle center
-        float distance = 1.0 - length(uv - normCenter);
+        float distance = 1.0 - length(uv - u_center);
         float fade = 0.005;
         distance = 1 - smoothstep(1 - u_radius, 1 - u_radius - fade, distance);
         FragColor.rgb = u_color;

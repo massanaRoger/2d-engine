@@ -9,7 +9,6 @@
 #include "SceneView.h"
 #include "utils.h"
 #include "components/Components.h"
-#include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/string_cast.hpp"
 #include "shader/Shader.h"
 #include "physics/PhysicsEngine.h"
@@ -42,6 +41,7 @@ void Renderer::draw(Shader &shader) {
         auto colorComponent = m_scene.Get<ColorComponent>(ent);
 
         shader.setMat4("transform", transformComponent->transformMatrix);
+        shader.setMat4("u_projection", m_projection);
         shader.setVec2("u_center", centerOfMassComponent->centerOfMass.x, centerOfMassComponent->centerOfMass.y);
         shader.setVec3("u_color", colorComponent->color);
         shader.setFloat("u_radius", circleComponent->radius);
@@ -59,9 +59,8 @@ void Renderer::draw(Shader &shader) {
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         glBufferData(GL_ARRAY_BUFFER, boxComponent->vertices.size() * sizeof(glm::vec3), boxComponent->vertices.data(), GL_STATIC_DRAW);
 
-        GLint transformLoc = glGetUniformLocation(shader.programID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformComponent->transformMatrix));
-
+        shader.setMat4("transform", transformComponent->transformMatrix);
+        shader.setMat4("u_projection", m_projection);
         shader.setInt("u_objType", 1);
         shader.setVec3("u_color", colorComponent->color);
 
@@ -361,3 +360,6 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height, c
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
 }
 
+void Renderer::setProjection(const glm::mat4 &projection) {
+    m_projection = projection;
+}
