@@ -12,7 +12,6 @@ typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
 typedef unsigned int EntityIndex;
 typedef unsigned int EntityVersion;
-typedef unsigned long long EntityID;
 
 inline EntityID CreateEntityId(EntityIndex index, EntityVersion version) {
     // Index on top, version on bottom

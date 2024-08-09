@@ -9,6 +9,7 @@ public:
 	Shader(const std::string& vFilePath, const std::string& fFilePath);
 	void setVec2(const char* name, float width, float height) const;
 	void setVec3(const char* name, const glm::vec3 &vec) const;
+	void setVec4(const char* name, const glm::vec4 &vec) const;
 	void setMat4(const char* name, const glm::mat4 &mat) const;
 	void setFloat(const char* name, float x) const;
 	void setInt(const char* name, int x) const;

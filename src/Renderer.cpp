@@ -43,7 +43,7 @@ void Renderer::draw(Shader &shader) {
         shader.setMat4("transform", transformComponent->transformMatrix);
         shader.setMat4("u_projection", m_projection);
         shader.setVec2("u_center", centerOfMassComponent->centerOfMass.x, centerOfMassComponent->centerOfMass.y);
-        shader.setVec3("u_color", colorComponent->color);
+        shader.setVec4("u_color", colorComponent->color);
         shader.setFloat("u_radius", circleComponent->radius);
         shader.setInt("u_objType", 0);
 
@@ -62,7 +62,7 @@ void Renderer::draw(Shader &shader) {
         shader.setMat4("transform", transformComponent->transformMatrix);
         shader.setMat4("u_projection", m_projection);
         shader.setInt("u_objType", 1);
-        shader.setVec3("u_color", colorComponent->color);
+        shader.setVec4("u_color", colorComponent->color);
 
         glBindVertexArray(m_VAO);
         glDrawArrays(GL_TRIANGLE_FAN, 0, boxComponent->vertices.size());
@@ -236,7 +236,7 @@ Renderer::Renderer(): m_VAO(-1), m_VBO(-1), m_EBO(-1), m_scene() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void Renderer::insertCircle(float centerX, float centerY, float radius, const glm::vec3 &color) {
+EntityID Renderer::insertCircle(float centerX, float centerY, float radius, const glm::vec4 &color) {
     EntityID circle = m_scene.NewEntity();
 
     // Positional and physics components
@@ -274,9 +274,35 @@ void Renderer::insertCircle(float centerX, float centerY, float radius, const gl
     colorComponent->color = color;
 
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
+    return circle;
 }
 
-void Renderer::insertStaticBox(const glm::vec3& position, float width, float height, const glm::vec3 &color) {
+EntityID Renderer::setHoveredCircle(const glm::vec3 &position, float radius, const glm::vec4 &color) {
+    if (m_hoveredCircle == std::numeric_limits<EntityID>::max()) {
+        m_hoveredCircle = m_scene.NewEntity();
+        auto transformComponent = m_scene.Assign<TransformComponent>(m_hoveredCircle);
+        auto centerOfMassComponent = m_scene.Assign<CenterOfMassComponent>(m_hoveredCircle);
+        auto circleComponent = m_scene.Assign<CircleComponent>(m_hoveredCircle);
+        auto colorComponent = m_scene.Assign<ColorComponent>(m_hoveredCircle);
+
+        transformComponent->transformMatrix = glm::mat4(1.0f);
+        centerOfMassComponent->centerOfMass = position;
+        circleComponent->radius = radius;
+        colorComponent->color = color;
+        return m_hoveredCircle;
+    }
+
+    auto centerOfMassComponent = m_scene.Get<CenterOfMassComponent>(m_hoveredCircle);
+    auto circleComponent = m_scene.Get<CircleComponent>(m_hoveredCircle);
+    auto colorComponent = m_scene.Get<ColorComponent>(m_hoveredCircle);
+
+    centerOfMassComponent->centerOfMass = position;
+    circleComponent->radius = radius;
+    colorComponent->color = color;
+    return m_hoveredCircle;
+}
+
+EntityID Renderer::insertStaticBox(const glm::vec3& position, float width, float height, const glm::vec4 &color) {
     EntityID box = m_scene.NewEntity();
     auto boxComponent = m_scene.Assign<BoxComponent>(box);
     auto massComponent = m_scene.Assign<MassComponent>(box);
@@ -315,9 +341,10 @@ void Renderer::insertStaticBox(const glm::vec3& position, float width, float hei
     colorComponent->color = color;
 
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
+    return box;
 }
 
-void Renderer::insertBox(const glm::vec3& position, float width, float height, const glm::vec3 &color) {
+EntityID Renderer::insertBox(const glm::vec3& position, float width, float height, const glm::vec4 &color) {
     EntityID box = m_scene.NewEntity();
     auto boxComponent = m_scene.Assign<BoxComponent>(box);
     auto massComponent = m_scene.Assign<MassComponent>(box);
@@ -358,7 +385,10 @@ void Renderer::insertBox(const glm::vec3& position, float width, float height, c
     colorComponent->color = color;
 
     Transformations::updateMatrix(transformComponent->transformMatrix, centerOfMassComponent->centerOfMass, orientationComponent->orientation);
+    return box;
 }
+
+
 
 void Renderer::setProjection(const glm::mat4 &projection) {
     m_projection = projection;

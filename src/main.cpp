@@ -25,6 +25,7 @@ void pixelToNDC(GLFWwindow *window, double x, double y, double *ndcX,
                 double *ndcY);
 void keyCallback(GLFWwindow *window, int key, int scancode, int action,
                  int mods);
+void updateCursorHover(GLFWwindow *window);
 
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
@@ -75,7 +76,7 @@ int main() {
 
   float width = 1.8f;
   float height = 0.1f;
-  renderer->insertStaticBox(glm::vec3(0.0f, -0.8f, 0.0f), width, height, guiManager->GetSelectedColor());
+  renderer->insertStaticBox(glm::vec3(0.0f, -0.8f, 0.0f), width, height, glm::vec4(guiManager->GetSelectedColor(), 1.0f));
 
   glViewport(0, 0, 800, 800);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -103,6 +104,7 @@ int main() {
     guiManager->Render();
 
     processInput(window);
+    updateCursorHover(window);
 
     double currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
@@ -175,7 +177,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
 
     float radius = 0.05f;
-    renderer->insertCircle(ndcX, ndcY, radius, guiManager->GetSelectedColor());
+    renderer->insertCircle(ndcX, ndcY, radius, glm::vec4(guiManager->GetSelectedColor(), 1.0f));
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS &&
       isPointerCursor) {
@@ -194,7 +196,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
     float width = 0.1f;
     float height = 0.1f;
-    renderer->insertBox(glm::vec3(ndcX, ndcY, 0.0f), width, height, guiManager->GetSelectedColor());
+    renderer->insertBox(glm::vec3(ndcX, ndcY, 0.0f), width, height, glm::vec4(guiManager->GetSelectedColor(), 1.0f));
   }
 }
 
@@ -207,4 +209,18 @@ void pixelToNDC(GLFWwindow *window, double x, double y, double *ndcX, double *nd
   // Adjust for aspect ratio
   *ndcX = ((2.0f * x) / windowWidth - 1.0f) * aspectRatio;
   *ndcY = 1.0f - (2.0f * y) / windowHeight;
+}
+
+void updateCursorHover(GLFWwindow *window) {
+  if (ImGui::IsWindowHovered()) {
+    return;
+  }
+
+  double xpos, ypos;
+  glfwGetCursorPos(window, &xpos, &ypos);
+  double ndcX, ndcY;
+  pixelToNDC(window, xpos, ypos, &ndcX, &ndcY);
+  float radius = 0.05f;
+
+  renderer->setHoveredCircle(glm::vec3(ndcX, ndcY, 0.0f), radius, glm::vec4(guiManager->GetSelectedColor(), 0.5f));
 }

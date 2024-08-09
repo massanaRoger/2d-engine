@@ -12,7 +12,7 @@ uniform vec2 u_min;
 uniform vec2 u_max;
 
 uniform int u_objType; // 0 - AABB, 1 - Circle, 2 - Polygon
-uniform vec3 u_color;
+uniform vec4 u_color;
 
 void main()
 {
@@ -24,9 +24,9 @@ void main()
         float distance = 1.0 - length(uv - u_center);
         float fade = 0.005;
         distance = 1 - smoothstep(1 - u_radius, 1 - u_radius - fade, distance);
-        FragColor.rgb = u_color;
-        FragColor.a = distance;
+        FragColor.rgb = vec3(u_color.x, u_color.y, u_color.z);
+        FragColor.a = distance * u_color.a;
     } else if (u_objType == 1) {
-        FragColor = vec4(u_color, 1.0);
+        FragColor = u_color;
     }
 }

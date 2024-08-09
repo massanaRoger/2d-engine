@@ -65,5 +65,5 @@ struct FrictionComponent {
 struct MovingComponent {};
 
 struct ColorComponent {
-    glm::vec3 color;
+    glm::vec4 color;
 };
