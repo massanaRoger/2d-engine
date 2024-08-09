@@ -162,6 +162,11 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods) {
+  auto& io = ImGui::GetIO();
+  if (io.WantCaptureMouse || io.WantCaptureKeyboard) {
+    return;
+  }
+
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS &&
       !isPointerCursor) {
     double xpos, ypos;
